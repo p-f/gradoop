@@ -154,12 +154,28 @@ public class GraphCollectionFactory
     return createEmptyCollection();
   }
 
-  @Override
+  /**
+   * Creates a graph collection from a graph transaction dataset.
+   *
+   * Overlapping vertices and edge are merged by Id comparison only.
+   *
+   * @param transactions  transaction dataset
+   * @return graph collection
+   */
   public GraphCollection fromTransactions(DataSet<GraphTransaction> transactions) {
     return new GraphCollection(layoutFactory.fromTransactions(transactions), config);
   }
 
-  @Override
+  /**
+   * Creates a graph collection layout from graph transactions.
+   *
+   * Overlapping vertices and edge are merged using provided reduce functions.
+   *
+   * @param transactions        transaction dataset
+   * @param vertexMergeReducer  vertex merge function
+   * @param edgeMergeReducer    edge merge function
+   * @return graph collection
+   */
   public GraphCollection fromTransactions(DataSet<GraphTransaction> transactions,
     GroupReduceFunction<Vertex, Vertex> vertexMergeReducer,
     GroupReduceFunction<Edge, Edge> edgeMergeReducer) {
