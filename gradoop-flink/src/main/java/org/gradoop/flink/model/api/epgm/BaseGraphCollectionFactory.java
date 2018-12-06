@@ -15,7 +15,7 @@
  */
 package org.gradoop.flink.model.api.epgm;
 
-import org.apache.flink.api.common.functions.GroupReduceFunction;
+
 import org.apache.flink.api.java.DataSet;
 import org.gradoop.common.model.api.entities.EPGMEdge;
 import org.gradoop.common.model.api.entities.EPGMGraphHead;
@@ -23,7 +23,6 @@ import org.gradoop.common.model.api.entities.EPGMVertex;
 import org.gradoop.common.model.api.entities.ElementFactoryProvider;
 import org.gradoop.flink.model.api.layouts.GraphCollectionLayoutFactory;
 import org.gradoop.flink.model.impl.epgm.LogicalGraph;
-import org.gradoop.flink.model.impl.layouts.transactional.tuples.GraphTransaction;
 
 import java.util.Collection;
 import java.util.Map;
@@ -106,31 +105,6 @@ public interface BaseGraphCollectionFactory<
    * @return graph collection
    */
   GC fromGraphs(LogicalGraph... logicalGraphLayout);
-
-  /**
-   * Creates a graph collection from a graph transaction dataset.
-   *
-   * Overlapping vertices and edge are merged by Id comparison only.
-   *
-   * @param transactions  transaction dataset
-   * @return graph collection
-   */
-  GC fromTransactions(DataSet<GraphTransaction> transactions);
-
-  /**
-   * Creates a graph collection layout from graph transactions.
-   *
-   * Overlapping vertices and edge are merged using provided reduce functions.
-   *
-   * @param transactions        transaction dataset
-   * @param vertexMergeReducer  vertex merge function
-   * @param edgeMergeReducer    edge merge function
-   * @return graph collection
-   */
-  GC fromTransactions(
-    DataSet<GraphTransaction> transactions,
-    GroupReduceFunction<V, V> vertexMergeReducer,
-    GroupReduceFunction<E, E> edgeMergeReducer);
 
   /**
    * Creates an empty graph collection.
