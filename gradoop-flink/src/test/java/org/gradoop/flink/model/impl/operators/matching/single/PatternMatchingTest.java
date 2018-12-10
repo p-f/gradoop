@@ -15,6 +15,9 @@
  */
 package org.gradoop.flink.model.impl.operators.matching.single;
 
+import org.gradoop.common.model.impl.pojo.Edge;
+import org.gradoop.common.model.impl.pojo.GraphHead;
+import org.gradoop.common.model.impl.pojo.Vertex;
 import org.gradoop.flink.model.GradoopFlinkTestBase;
 import org.gradoop.flink.model.impl.epgm.GraphCollection;
 import org.gradoop.flink.model.impl.epgm.LogicalGraph;
@@ -46,7 +49,7 @@ public abstract class PatternMatchingTest extends GradoopFlinkTestBase {
     this.expectedCollection = expectedCollection;
   }
 
-  public abstract PatternMatching getImplementation(String queryGraph, boolean attachData);
+  public abstract PatternMatching<GraphHead, Vertex, Edge, LogicalGraph, GraphCollection> getImplementation(String queryGraph, boolean attachData);
 
   @Test
   public void testGraphElementIdEquality() throws Exception {

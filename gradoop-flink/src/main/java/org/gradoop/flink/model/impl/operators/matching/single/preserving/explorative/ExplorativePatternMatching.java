@@ -22,15 +22,15 @@ import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.typeutils.TupleTypeInfo;
 import org.apache.flink.api.java.typeutils.TypeExtractor;
 import org.apache.log4j.Logger;
+import org.gradoop.common.model.api.entities.EPGMElement;
 import org.gradoop.common.model.api.entities.EPGMGraphHeadFactory;
 import org.gradoop.common.model.api.entities.EPGMVertexFactory;
 import org.gradoop.common.model.impl.id.GradoopId;
-import org.gradoop.common.model.impl.pojo.Element;
+import org.gradoop.common.model.impl.pojo.Edge;
 import org.gradoop.common.model.impl.pojo.GraphHead;
 import org.gradoop.common.model.impl.pojo.Vertex;
 import org.gradoop.flink.model.impl.epgm.GraphCollection;
 import org.gradoop.flink.model.impl.epgm.LogicalGraph;
-import org.gradoop.flink.model.api.operators.UnaryGraphToCollectionOperator;
 import org.gradoop.flink.model.impl.functions.epgm.Id;
 import org.gradoop.flink.model.impl.functions.epgm.VertexFromId;
 import org.gradoop.flink.model.impl.functions.tuple.ObjectTo1;
@@ -66,8 +66,7 @@ import static org.apache.flink.api.common.operators.base.JoinOperatorBase.JoinHi
  * given traversal code which is derived from the query pattern.
  */
 public class ExplorativePatternMatching
-  extends PatternMatching
-  implements UnaryGraphToCollectionOperator {
+  extends PatternMatching<GraphHead, Vertex, Edge, LogicalGraph, GraphCollection> {
   /**
    * Name for broadcast set which contains the superstep id.
    */
@@ -138,7 +137,7 @@ public class ExplorativePatternMatching
       matchingVertices = matchingVertices
         .map(new Id<>())
         .map(new ObjectTo1<>())
-        .map(new VertexFromId(vertexFactory));
+        .map(new VertexFromId<>(vertexFactory));
     }
 
     DataSet<Tuple2<Vertex, GraphHead>> pairs = matchingVertices
@@ -211,8 +210,8 @@ public class ExplorativePatternMatching
     // Post-Processing (build Graph Collection from embeddings)
     //--------------------------------------------------------------------------
 
-    DataSet<Element> elements = embeddings
-      .flatMap(new ElementsFromEmbedding(traversalCode,
+    DataSet<EPGMElement> elements = embeddings
+      .flatMap(new ElementsFromEmbedding<>(traversalCode,
         graph.getConfig().getGraphHeadFactory(),
         graph.getConfig().getVertexFactory(),
         graph.getConfig().getEdgeFactory(),
@@ -221,7 +220,7 @@ public class ExplorativePatternMatching
 
     return doAttachData() ?
       PostProcessor.extractGraphCollectionWithData(elements, graph, true) :
-      PostProcessor.extractGraphCollection(elements, graph.getConfig(), true);
+      PostProcessor.extractGraphCollection(elements, graph.getCollectionFactory(), true);
   }
 
 

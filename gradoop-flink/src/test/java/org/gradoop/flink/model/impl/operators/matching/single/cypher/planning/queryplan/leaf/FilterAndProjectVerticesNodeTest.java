@@ -39,9 +39,9 @@ import static org.hamcrest.core.Is.is;
 public class FilterAndProjectVerticesNodeTest extends GradoopFlinkTestBase {
 
   @Test
-  public void testMetaDataInitialization() throws Exception {
+  public void testMetaDataInitialization() {
     String variable = "a";
-    FilterAndProjectVerticesNode node = new FilterAndProjectVerticesNode(
+    FilterAndProjectVerticesNode node = new FilterAndProjectVerticesNode<>(
       null, variable, new CNF(), Sets.newHashSet());
 
     EmbeddingMetaData embeddingMetaData = node.getEmbeddingMetaData();
@@ -69,7 +69,7 @@ public class FilterAndProjectVerticesNodeTest extends GradoopFlinkTestBase {
     CNF filterPredicate = queryHandler.getPredicates().getSubCNF(Sets.newHashSet("n"));
     Set<String> projectionKeys = queryHandler.getPredicates().getPropertyKeys("n");
 
-    FilterAndProjectVerticesNode node = new FilterAndProjectVerticesNode(
+    FilterAndProjectVerticesNode<Vertex> node = new FilterAndProjectVerticesNode<>(
       vertices, "n", filterPredicate, projectionKeys);
     List<Embedding> filteredVertices = node.execute().collect();
 

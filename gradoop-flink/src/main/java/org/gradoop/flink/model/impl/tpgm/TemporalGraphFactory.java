@@ -41,7 +41,7 @@ import java.util.Collection;
  * Responsible for creating instances of {@link TemporalGraph} based on a specific layout.
  */
 public class TemporalGraphFactory
-  implements BaseGraphFactory<TemporalGraphHead, TemporalVertex, TemporalEdge, TemporalGraph> {
+  implements BaseGraphFactory<TemporalGraphHead, TemporalVertex, TemporalEdge, TemporalGraph, TemporalGraphCollection> {
   /**
    * The factory to create a temporal layout.
    */

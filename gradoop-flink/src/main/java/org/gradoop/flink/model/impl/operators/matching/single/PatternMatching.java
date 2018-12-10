@@ -20,11 +20,14 @@ import com.google.common.base.Strings;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.log4j.Logger;
+import org.gradoop.common.model.api.entities.EPGMEdge;
+import org.gradoop.common.model.api.entities.EPGMGraphHead;
+import org.gradoop.common.model.api.entities.EPGMVertex;
 import org.gradoop.common.model.impl.id.GradoopId;
 import org.gradoop.common.model.impl.properties.PropertyValue;
-import org.gradoop.flink.model.impl.epgm.GraphCollection;
-import org.gradoop.flink.model.impl.epgm.LogicalGraph;
-import org.gradoop.flink.model.api.operators.UnaryGraphToCollectionOperator;
+import org.gradoop.flink.model.api.epgm.BaseGraph;
+import org.gradoop.flink.model.api.epgm.BaseGraphCollection;
+import org.gradoop.flink.model.api.operators.UnaryBaseGraphToBaseCollectionOperator;
 import org.gradoop.flink.model.impl.functions.epgm.PairElementWithPropertyValue;
 import org.gradoop.flink.model.impl.operators.matching.common.debug.PrintIdWithCandidates;
 import org.gradoop.flink.model.impl.operators.matching.common.debug.PrintTripleWithCandidates;
@@ -35,8 +38,20 @@ import org.gradoop.flink.model.impl.operators.matching.common.tuples.TripleWithC
 
 /**
  * Base class for pattern matching implementations.
+ *
+ * @param <G> type of the graph head
+ * @param <V> the vertex type
+ * @param <E> the edge type
+ * @param <LG> the type of the logical graph that will be created with this factory
+ * @param <GC> the type of the according graph collection
  */
-public abstract class PatternMatching implements UnaryGraphToCollectionOperator {
+public abstract class PatternMatching<
+  G extends EPGMGraphHead,
+  V extends EPGMVertex,
+  E extends EPGMEdge,
+  LG extends BaseGraph<G, V, E, LG, GC>,
+  GC extends BaseGraphCollection<G, V, E, GC>>
+  implements UnaryBaseGraphToBaseCollectionOperator<LG, GC> {
 
   /**
    * The property key used to stored the variable mappings inside the GraphHead properties
@@ -86,12 +101,12 @@ public abstract class PatternMatching implements UnaryGraphToCollectionOperator 
   }
 
   @Override
-  public GraphCollection execute(LogicalGraph graph) {
+  public GC execute(LG graph) {
     if (log.isDebugEnabled()) {
       initDebugMappings(graph);
     }
 
-    GraphCollection result;
+    GC result;
 
     if (queryHandler.isSingleVertexGraph()) {
       result = executeForVertex(graph);
@@ -108,7 +123,7 @@ public abstract class PatternMatching implements UnaryGraphToCollectionOperator 
    * @param graph data graph
    * @return result collection
    */
-  protected abstract GraphCollection executeForVertex(LogicalGraph graph);
+  protected abstract GC executeForVertex(LG graph);
 
   /**
    * Computes the result for pattern query graph.
@@ -116,7 +131,7 @@ public abstract class PatternMatching implements UnaryGraphToCollectionOperator 
    * @param graph data graph
    * @return result collection
    */
-  protected abstract GraphCollection executeForPattern(LogicalGraph graph);
+  protected abstract GC executeForPattern(LG graph);
 
   /**
    * Returns the query handler.
@@ -197,7 +212,7 @@ public abstract class PatternMatching implements UnaryGraphToCollectionOperator 
    *
    * @param graph data graph
    */
-  private void initDebugMappings(LogicalGraph graph) {
+  private void initDebugMappings(LG graph) {
     vertexMapping = graph.getVertices()
       .map(new PairElementWithPropertyValue<>("id"));
     edgeMapping = graph.getEdges()

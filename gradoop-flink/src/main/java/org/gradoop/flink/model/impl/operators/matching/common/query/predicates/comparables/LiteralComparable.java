@@ -15,6 +15,7 @@
  */
 package org.gradoop.flink.model.impl.operators.matching.common.query.predicates.comparables;
 
+import org.gradoop.common.model.api.entities.EPGMGraphElement;
 import org.gradoop.common.model.impl.pojo.GraphElement;
 import org.gradoop.common.model.impl.properties.PropertyValue;
 import org.gradoop.flink.model.impl.operators.matching.common.query.predicates.QueryComparable;
@@ -65,7 +66,7 @@ public class LiteralComparable extends QueryComparable {
   }
 
   @Override
-  public PropertyValue evaluate(GraphElement element) {
+  public PropertyValue evaluate(EPGMGraphElement element) {
     return PropertyValue.create(literal.getValue());
   }
 

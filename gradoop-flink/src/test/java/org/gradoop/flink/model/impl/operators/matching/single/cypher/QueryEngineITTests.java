@@ -89,7 +89,7 @@ public class QueryEngineITTests extends GradoopFlinkTestBase {
 
     final QueryHandler queryHandler = new QueryHandler(q);
 
-    GreedyPlanner planner = new GreedyPlanner(socialNetwork, queryHandler, socialNetworkStatistics,
+    GreedyPlanner planner = new GreedyPlanner<>(socialNetwork, queryHandler, socialNetworkStatistics,
       MatchStrategy.ISOMORPHISM, MatchStrategy.ISOMORPHISM);
 
     PlanTableEntry planTableEntry = planner.plan();

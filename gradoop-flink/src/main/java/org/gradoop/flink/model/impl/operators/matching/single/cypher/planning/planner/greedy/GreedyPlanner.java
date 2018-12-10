@@ -18,8 +18,12 @@ package org.gradoop.flink.model.impl.operators.matching.single.cypher.planning.p
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.flink.api.java.DataSet;
+import org.gradoop.common.model.api.entities.EPGMEdge;
+import org.gradoop.common.model.api.entities.EPGMGraphHead;
+import org.gradoop.common.model.api.entities.EPGMVertex;
 import org.gradoop.common.util.GradoopConstants;
-import org.gradoop.flink.model.impl.epgm.LogicalGraph;
+import org.gradoop.flink.model.api.epgm.BaseGraph;
+import org.gradoop.flink.model.api.epgm.BaseGraphCollection;
 import org.gradoop.flink.model.impl.operators.matching.common.MatchStrategy;
 import org.gradoop.flink.model.impl.operators.matching.common.query.QueryHandler;
 import org.gradoop.flink.model.impl.operators.matching.common.query.predicates.CNF;
@@ -60,12 +64,23 @@ import static org.gradoop.flink.model.impl.operators.matching.single.cypher.plan
 /**
  * A greedy query planner that builds a query plan by iteratively picking the cheapest partial query
  * plan and extending it.
+ *
+ * @param <G> type of the graph head
+ * @param <V> type of the vertex
+ * @param <E> type of the edge
+ * @param <LG> type of the graph instance
  */
-public class GreedyPlanner {
+public class GreedyPlanner<
+  G extends EPGMGraphHead,
+  V extends EPGMVertex,
+  E extends EPGMEdge,
+  LG extends BaseGraph<G, V, E, LG, GC>,
+  GC extends BaseGraphCollection<G, V, E, GC>> {
+
   /**
    * The search graph to be queried
    */
-  private final LogicalGraph graph;
+  private final LG graph;
   /**
    * The query handler represents the query.
    */
@@ -92,7 +107,7 @@ public class GreedyPlanner {
    * @param vertexStrategy morphism type for vertex mappings
    * @param edgeStrategy morphism type for edge mappings
    */
-  public GreedyPlanner(LogicalGraph graph, QueryHandler queryHandler,
+  public GreedyPlanner(LG graph, QueryHandler queryHandler,
     GraphStatistics graphStatistics, MatchStrategy vertexStrategy, MatchStrategy edgeStrategy) {
     this.graph = graph;
     this.queryHandler = queryHandler;
@@ -165,11 +180,11 @@ public class GreedyPlanner {
       CNF vertexPredicates = allPredicates.removeSubCNF(vertexVariable);
       Set<String> projectionKeys = allPredicates.getPropertyKeys(vertexVariable);
 
-      DataSet<org.gradoop.common.model.impl.pojo.Vertex> vertices =
+      DataSet<V> vertices =
         vertex.getLabel().equals(GradoopConstants.DEFAULT_VERTEX_LABEL) ?
           graph.getVertices() : graph.getVerticesByLabel(vertex.getLabel());
 
-      FilterAndProjectVerticesNode node = new FilterAndProjectVerticesNode(vertices,
+      FilterAndProjectVerticesNode<V> node = new FilterAndProjectVerticesNode<>(vertices,
         vertex.getVariable(), vertexPredicates, projectionKeys);
 
       planTable.add(new PlanTableEntry(VERTEX, Sets.newHashSet(vertexVariable), allPredicates,
@@ -197,11 +212,11 @@ public class GreedyPlanner {
 
       boolean isPath = edge.getUpperBound() != 1;
 
-      DataSet<org.gradoop.common.model.impl.pojo.Edge> edges =
+      DataSet<E> edges =
         edge.getLabel().equals(GradoopConstants.DEFAULT_EDGE_LABEL) ?
           graph.getEdges() : graph.getEdgesByLabel(edge.getLabel());
 
-      FilterAndProjectEdgesNode node = new FilterAndProjectEdgesNode(edges,
+      FilterAndProjectEdgesNode node = new FilterAndProjectEdgesNode<>(edges,
         sourceVariable, edgeVariable, targetVariable, edgePredicates, projectionKeys, isPath);
 
       PlanTableEntry.Type type = edge.hasVariableLength() ? PATH : EDGE;

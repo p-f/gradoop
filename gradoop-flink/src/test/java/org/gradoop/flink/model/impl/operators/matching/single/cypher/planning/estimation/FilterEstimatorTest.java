@@ -31,7 +31,7 @@ public class FilterEstimatorTest extends EstimatorTestBase {
     String query = "MATCH (n)";
     QueryHandler queryHandler = new QueryHandler(query);
 
-    FilterAndProjectVerticesNode node = new FilterAndProjectVerticesNode(null,
+    FilterAndProjectVerticesNode node = new FilterAndProjectVerticesNode<>(null,
       "n", queryHandler.getPredicates().getSubCNF("n"), Sets.newHashSet());
 
     FilterEstimator elementEstimator = new FilterEstimator(queryHandler, STATS);
@@ -46,7 +46,7 @@ public class FilterEstimatorTest extends EstimatorTestBase {
     String query = "MATCH (n:Tag)";
     QueryHandler queryHandler = new QueryHandler(query);
 
-    FilterAndProjectVerticesNode node = new FilterAndProjectVerticesNode(null,
+    FilterAndProjectVerticesNode node = new FilterAndProjectVerticesNode<>(null,
       "n", queryHandler.getPredicates().getSubCNF("n"), Sets.newHashSet());
 
     FilterEstimator elementEstimator = new FilterEstimator(queryHandler, STATS);
@@ -61,7 +61,7 @@ public class FilterEstimatorTest extends EstimatorTestBase {
     String query = "MATCH (n)-[e]->(m)";
     QueryHandler queryHandler = new QueryHandler(query);
 
-    FilterAndProjectEdgesNode node = new FilterAndProjectEdgesNode(null,
+    FilterAndProjectEdgesNode node = new FilterAndProjectEdgesNode<>(null,
       "n", "e", "m",
       queryHandler.getPredicates().getSubCNF("e"), Sets.newHashSet(), false);
 
@@ -77,7 +77,7 @@ public class FilterEstimatorTest extends EstimatorTestBase {
     String query = "MATCH (n)-[e:knows]->(m)";
     QueryHandler queryHandler = new QueryHandler(query);
 
-    FilterAndProjectEdgesNode node = new FilterAndProjectEdgesNode(null,
+    FilterAndProjectEdgesNode node = new FilterAndProjectEdgesNode<>(null,
       "n", "e", "m",
       queryHandler.getPredicates().getSubCNF("e"), Sets.newHashSet(), false);
 

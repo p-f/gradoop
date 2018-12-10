@@ -20,6 +20,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.ProgramDescription;
 import org.apache.flink.api.common.operators.base.JoinOperatorBase.JoinHint;
 import org.apache.hadoop.conf.Configuration;
+import org.gradoop.common.model.impl.pojo.Edge;
+import org.gradoop.common.model.impl.pojo.GraphHead;
+import org.gradoop.common.model.impl.pojo.Vertex;
 import org.gradoop.examples.AbstractRunner;
 import org.gradoop.flink.model.impl.epgm.GraphCollection;
 import org.gradoop.flink.model.impl.epgm.LogicalGraph;
@@ -213,7 +216,7 @@ public class PatternMatchingRunner extends AbstractRunner implements ProgramDesc
     LogicalGraph databaseGraph,
     String query, boolean attachData, String algorithm, GraphStatistics statistics) {
 
-    PatternMatching op;
+    PatternMatching<GraphHead, Vertex, Edge, LogicalGraph, GraphCollection> op;
 
     switch (algorithm) {
     case ALGO_DUAL_BULK:
@@ -240,7 +243,7 @@ public class PatternMatchingRunner extends AbstractRunner implements ProgramDesc
         .build();
       break;
     case ALGO_CYPHER:
-      op = new CypherPatternMatching(query, attachData,
+      op = new CypherPatternMatching<>(query, attachData,
         MatchStrategy.ISOMORPHISM, MatchStrategy.ISOMORPHISM,
         statistics);
       break;
