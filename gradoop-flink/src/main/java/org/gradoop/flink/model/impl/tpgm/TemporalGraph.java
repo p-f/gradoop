@@ -22,6 +22,7 @@ import org.gradoop.common.model.impl.pojo.temporal.TemporalGraphHead;
 import org.gradoop.common.model.impl.pojo.temporal.TemporalVertex;
 import org.gradoop.flink.io.api.DataSink;
 import org.gradoop.flink.model.api.epgm.BaseGraph;
+import org.gradoop.flink.model.api.epgm.BaseGraphCollectionFactory;
 import org.gradoop.flink.model.api.epgm.BaseGraphFactory;
 import org.gradoop.flink.model.api.layouts.LogicalGraphLayout;
 import org.gradoop.flink.model.api.operators.UnaryBaseGraphToBaseGraphOperator;
@@ -55,7 +56,7 @@ import org.gradoop.flink.util.GradoopFlinkConfig;
  * the layout. This is just for convenience and API synchronicity.
  */
 public class TemporalGraph
-  implements BaseGraph<TemporalGraphHead, TemporalVertex, TemporalEdge, TemporalGraph>,
+  implements BaseGraph<TemporalGraphHead, TemporalVertex, TemporalEdge, TemporalGraph, TemporalGraphCollection>,
   TemporalGraphOperators {
 
   /**
@@ -85,9 +86,14 @@ public class TemporalGraph
   }
 
   @Override
-  public BaseGraphFactory<TemporalGraphHead, TemporalVertex, TemporalEdge, TemporalGraph>
+  public BaseGraphFactory<TemporalGraphHead, TemporalVertex, TemporalEdge, TemporalGraph, TemporalGraphCollection>
   getFactory() {
     return this.config.getTemporalGraphFactory();
+  }
+
+  @Override
+  public BaseGraphCollectionFactory<TemporalGraphHead, TemporalVertex, TemporalEdge, TemporalGraphCollection> getCollectionFactory() {
+    return this.config.getTemporalGraphCollectionFactory();
   }
 
   @Override

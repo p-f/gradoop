@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014 - 2019 Leipzig University (Database Research Group)
+ * Copyright © 2014 - 2018 Leipzig University (Database Research Group)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,20 +15,24 @@
  */
 package org.gradoop.flink.model.api.operators;
 
-import org.gradoop.flink.model.impl.epgm.LogicalGraph;
-import org.gradoop.flink.model.impl.epgm.GraphCollection;
+import org.gradoop.flink.model.api.epgm.BaseGraph;
+import org.gradoop.flink.model.api.epgm.BaseGraphCollection;
 
 /**
- * Creates a {@link GraphCollection} based on one {@link LogicalGraph}.
+ * Creates a graph collection of type {@link GC} based on one graph of type {@link G}.
+ *
+ * @param <G> the type of the graph used as input
+ * @param <GC> the type of the graph used as return value
  */
-public interface UnaryGraphToCollectionOperator
-  extends UnaryBaseGraphToBaseCollectionOperator<LogicalGraph, GraphCollection> {
+public interface UnaryBaseGraphToBaseCollectionOperator<
+  G extends BaseGraph,
+  GC extends BaseGraphCollection> extends Operator {
 
   /**
    * Executes the operator.
    *
    * @param graph input graph
-   * @return operator result
+   * @return resulting graph collection
    */
-  GraphCollection execute(LogicalGraph graph);
+  GC execute(G graph);
 }

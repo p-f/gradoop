@@ -26,8 +26,8 @@ import org.gradoop.flink.model.api.functions.TransformationFunction;
 import org.gradoop.flink.model.api.functions.VertexAggregateFunction;
 import org.gradoop.flink.model.api.operators.BinaryGraphToGraphOperator;
 import org.gradoop.flink.model.api.operators.GraphsToGraphOperator;
+import org.gradoop.flink.model.api.operators.UnaryBaseGraphToBaseCollectionOperator;
 import org.gradoop.flink.model.api.operators.UnaryBaseGraphToBaseGraphOperator;
-import org.gradoop.flink.model.api.operators.UnaryGraphToCollectionOperator;
 import org.gradoop.flink.model.impl.epgm.GraphCollection;
 import org.gradoop.flink.model.impl.epgm.LogicalGraph;
 import org.gradoop.flink.model.impl.operators.grouping.Grouping;
@@ -645,5 +645,6 @@ public interface LogicalGraphOperators extends GraphBaseOperators {
    * @param operator unary graph to collection operator
    * @return result of given operator
    */
-  GraphCollection callForCollection(UnaryGraphToCollectionOperator operator);
+  GraphCollection callForCollection(
+    UnaryBaseGraphToBaseCollectionOperator<LogicalGraph, GraphCollection> operator);
 }

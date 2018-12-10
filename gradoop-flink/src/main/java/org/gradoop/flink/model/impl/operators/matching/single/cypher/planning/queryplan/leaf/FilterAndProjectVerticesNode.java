@@ -16,7 +16,7 @@
 package org.gradoop.flink.model.impl.operators.matching.single.cypher.planning.queryplan.leaf;
 
 import org.apache.flink.api.java.DataSet;
-import org.gradoop.common.model.impl.pojo.Vertex;
+import org.gradoop.common.model.api.entities.EPGMVertex;
 import org.gradoop.flink.model.impl.operators.matching.common.query.predicates.CNF;
 import org.gradoop.flink.model.impl.operators.matching.single.cypher.pojos.Embedding;
 import org.gradoop.flink.model.impl.operators.matching.single.cypher.pojos.EmbeddingMetaData;
@@ -31,12 +31,15 @@ import java.util.Set;
 
 /**
  * Leaf node that wraps a {@link FilterAndProjectVertices} operator.
+ *
+ * @param <V> type of the vertex
  */
-public class FilterAndProjectVerticesNode extends LeafNode implements FilterNode, ProjectionNode {
+public class FilterAndProjectVerticesNode<V extends EPGMVertex> extends LeafNode
+  implements FilterNode, ProjectionNode {
   /**
    * Input data set
    */
-  private DataSet<Vertex> vertices;
+  private DataSet<V> vertices;
   /**
    * Query variable of the vertex
    */
@@ -58,7 +61,7 @@ public class FilterAndProjectVerticesNode extends LeafNode implements FilterNode
    * @param filterPredicate filter predicate to be applied on edges
    * @param projectionKeys property keys whose associated values are projected to the output
    */
-  public FilterAndProjectVerticesNode(DataSet<Vertex> vertices, String vertexVariable,
+  public FilterAndProjectVerticesNode(DataSet<V> vertices, String vertexVariable,
     CNF filterPredicate, Set<String> projectionKeys) {
     this.vertices = vertices;
     this.vertexVariable = vertexVariable;
@@ -68,8 +71,8 @@ public class FilterAndProjectVerticesNode extends LeafNode implements FilterNode
 
   @Override
   public DataSet<Embedding> execute() {
-    FilterAndProjectVertices op =
-      new FilterAndProjectVertices(vertices, filterPredicate, projectionKeys);
+    FilterAndProjectVertices<V> op =
+      new FilterAndProjectVertices<>(vertices, filterPredicate, projectionKeys);
     op.setName(toString());
     return op.evaluate();
   }

@@ -22,6 +22,7 @@ import org.apache.flink.api.java.tuple.Tuple1;
 import org.apache.log4j.Logger;
 import org.gradoop.common.model.impl.id.GradoopId;
 import org.gradoop.common.model.impl.pojo.Edge;
+import org.gradoop.common.model.impl.pojo.GraphHead;
 import org.gradoop.common.model.impl.pojo.Vertex;
 import org.gradoop.flink.model.impl.epgm.GraphCollection;
 import org.gradoop.flink.model.impl.epgm.GraphCollectionFactory;
@@ -56,7 +57,8 @@ import static org.gradoop.flink.model.impl.operators.matching.common.debug.Print
 /**
  * Vertex-centric Dual-Simulation.
  */
-public class DualSimulation extends PatternMatching {
+public class DualSimulation
+  extends PatternMatching<GraphHead, Vertex, Edge, LogicalGraph, GraphCollection> {
 
   /**
    * Logger
@@ -102,7 +104,7 @@ public class DualSimulation extends PatternMatching {
     } else {
       return collectionFactory.fromGraph(
         graphFactory.fromDataSets(matchingVertexIds
-            .map(new VertexFromId(graph.getConfig().getVertexFactory()))));
+            .map(new VertexFromId<>(graph.getConfig().getVertexFactory()))));
     }
   }
 

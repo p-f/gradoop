@@ -40,11 +40,11 @@ import static org.hamcrest.core.Is.is;
 public class FilterAndProjectEdgesNodeTest extends GradoopFlinkTestBase {
 
   @Test
-  public void testMetaDataInitialization() throws Exception {
+  public void testMetaDataInitialization() {
     String sourceVariable = "a";
     String edgeVariable   = "e";
     String targetVariable = "b";
-    FilterAndProjectEdgesNode node = new FilterAndProjectEdgesNode(
+    FilterAndProjectEdgesNode node = new FilterAndProjectEdgesNode<>(
       null, sourceVariable, edgeVariable, targetVariable, new CNF(), new HashSet<>(), false);
 
     EmbeddingMetaData embeddingMetaData = node.getEmbeddingMetaData();
@@ -55,11 +55,11 @@ public class FilterAndProjectEdgesNodeTest extends GradoopFlinkTestBase {
   }
 
   @Test
-  public void testMetaDataInitializationWithLoop() throws Exception {
+  public void testMetaDataInitializationWithLoop() {
     String sourceVariable = "a";
     String edgeVariable   = "e";
     String targetVariable = "a";
-    FilterAndProjectEdgesNode node = new FilterAndProjectEdgesNode(
+    FilterAndProjectEdgesNode node = new FilterAndProjectEdgesNode<>(
       null, sourceVariable, edgeVariable, targetVariable, new CNF(), new HashSet<>(), false);
 
     EmbeddingMetaData embeddingMetaData = node.getEmbeddingMetaData();
@@ -91,7 +91,7 @@ public class FilterAndProjectEdgesNodeTest extends GradoopFlinkTestBase {
     CNF filterPredicate = queryHandler.getPredicates().getSubCNF(Sets.newHashSet("e"));
     Set<String> projectionKeys = queryHandler.getPredicates().getPropertyKeys("e");
 
-    FilterAndProjectEdgesNode node = new FilterAndProjectEdgesNode(
+    FilterAndProjectEdgesNode<Edge> node = new FilterAndProjectEdgesNode<>(
       edges, "a", "e", "b", filterPredicate, projectionKeys, false);
 
     List<Embedding> filteredEdges = node.execute().collect();
