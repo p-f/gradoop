@@ -18,6 +18,7 @@ package org.gradoop.flink.model.api.epgm;
 import org.gradoop.common.model.api.entities.EPGMEdge;
 import org.gradoop.common.model.api.entities.EPGMGraphHead;
 import org.gradoop.common.model.api.entities.EPGMVertex;
+import org.gradoop.flink.io.impl.gdl.GDLConsoleOutput;
 import org.gradoop.flink.model.api.layouts.GraphCollectionLayout;
 import org.gradoop.flink.util.GradoopFlinkConfig;
 
@@ -47,4 +48,13 @@ public interface BaseGraphCollection<
    * @return a factory that can be used to create a {@link GC} instance
    */
   BaseGraphCollectionFactory<G, V, E, GC> getFactory();
+
+  /**
+   * Prints this graph collection to the console.
+   *
+   * @throws Exception forwarded DataSet print() Exception.
+   */
+  default void print() throws Exception {
+    GDLConsoleOutput.print(this);
+  }
 }

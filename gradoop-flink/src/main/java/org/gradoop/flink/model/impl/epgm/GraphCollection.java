@@ -25,7 +25,6 @@ import org.gradoop.common.model.impl.pojo.GraphHead;
 import org.gradoop.common.model.impl.pojo.Vertex;
 import org.gradoop.common.util.Order;
 import org.gradoop.flink.io.api.DataSink;
-import org.gradoop.flink.io.impl.gdl.GDLConsoleOutput;
 import org.gradoop.flink.model.api.epgm.BaseGraphCollection;
 import org.gradoop.flink.model.api.epgm.BaseGraphCollectionFactory;
 import org.gradoop.flink.model.api.epgm.GraphCollectionOperators;
@@ -68,6 +67,7 @@ import org.gradoop.flink.model.impl.tpgm.TemporalGraphCollection;
 import org.gradoop.flink.util.GradoopFlinkConfig;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Objects;
 
 /**
@@ -187,9 +187,7 @@ public class GraphCollection implements
 
     GradoopIdSet graphIds = new GradoopIdSet();
 
-    for (GradoopId id : identifiers) {
-      graphIds.add(id);
-    }
+    Collections.addAll(graphIds, identifiers);
 
     return getGraphs(graphIds);
   }
@@ -427,14 +425,5 @@ public class GraphCollection implements
   @Override
   public void writeTo(DataSink dataSink, boolean overWrite) throws IOException {
     dataSink.write(this, overWrite);
-  }
-
-  /**
-   * Prints this graph collection to the console.
-   *
-   * @throws Exception forwarded DataSet print() Exception.
-   */
-  public void print() throws Exception {
-    GDLConsoleOutput.print(this);
   }
 }
