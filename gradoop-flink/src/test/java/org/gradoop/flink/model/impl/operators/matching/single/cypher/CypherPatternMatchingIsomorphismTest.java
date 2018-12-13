@@ -19,12 +19,17 @@ import com.google.common.collect.Lists;
 import org.gradoop.common.model.impl.pojo.Edge;
 import org.gradoop.common.model.impl.pojo.GraphHead;
 import org.gradoop.common.model.impl.pojo.Vertex;
+import org.gradoop.common.model.impl.pojo.temporal.TemporalEdge;
+import org.gradoop.common.model.impl.pojo.temporal.TemporalGraphHead;
+import org.gradoop.common.model.impl.pojo.temporal.TemporalVertex;
 import org.gradoop.flink.model.impl.epgm.GraphCollection;
 import org.gradoop.flink.model.impl.epgm.LogicalGraph;
 import org.gradoop.flink.model.impl.operators.matching.common.MatchStrategy;
 import org.gradoop.flink.model.impl.operators.matching.common.statistics.GraphStatistics;
 import org.gradoop.flink.model.impl.operators.matching.single.PatternMatching;
 import org.gradoop.flink.model.impl.operators.matching.single.SubgraphIsomorphismTest;
+import org.gradoop.flink.model.impl.tpgm.TemporalGraph;
+import org.gradoop.flink.model.impl.tpgm.TemporalGraphCollection;
 import org.junit.runners.Parameterized;
 
 import java.util.List;
@@ -88,6 +93,16 @@ public class CypherPatternMatchingIsomorphismTest extends SubgraphIsomorphismTes
   @Override
   public PatternMatching<GraphHead, Vertex, Edge, LogicalGraph, GraphCollection>
   getImplementation(String queryGraph, boolean attachData) {
+    int n = 42; // just used for testing
+    return new CypherPatternMatching<>("MATCH " + queryGraph, attachData,
+      MatchStrategy.ISOMORPHISM, MatchStrategy.ISOMORPHISM,
+      new GraphStatistics(n, n, n, n));
+  }
+
+  @Override
+  public PatternMatching<TemporalGraphHead, TemporalVertex, TemporalEdge, TemporalGraph,
+    TemporalGraphCollection> getTemporalImplementation(
+    String queryGraph, boolean attachData) {
     int n = 42; // just used for testing
     return new CypherPatternMatching<>("MATCH " + queryGraph, attachData,
       MatchStrategy.ISOMORPHISM, MatchStrategy.ISOMORPHISM,

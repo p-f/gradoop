@@ -70,16 +70,16 @@ public class TemporalVertexFromNonTemporal implements MapFunction<Vertex, Tempor
    *
    * @param value the non-temporal element
    * @return the temporal element
+   * @throws Exception on failure
    */
   @Override
-  public TemporalVertex map(Vertex value) {
+  public TemporalVertex map(Vertex value) throws Exception {
     reuse.setId(value.getId());
     reuse.setLabel(value.getLabel());
     reuse.setProperties(value.getProperties());
     reuse.setGraphIds(value.getGraphIds());
     if (timeIntervalExtractor != null) {
-      reuse.setValidFrom(timeIntervalExtractor.getValidFrom(value));
-      reuse.setValidTo(timeIntervalExtractor.getValidTo(value));
+      reuse.setValidTime(timeIntervalExtractor.map(value));
     }
     return reuse;
   }

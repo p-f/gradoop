@@ -41,6 +41,8 @@ import java.util.List;
  * an {@link Embedding}:
  *
  * ([IdEntry(1),IdEntry(0),IdEntry(2)],[PropertyEntry(2017),PropertyEntry(NULL)])
+ *
+ * @param <E> edge type
  */
 public class FilterAndProjectEdges<E extends EPGMEdge> implements PhysicalOperator {
   /**

@@ -15,34 +15,17 @@
  */
 package org.gradoop.flink.model.api.functions;
 
-import org.gradoop.common.model.impl.pojo.Element;
-import org.gradoop.common.model.impl.pojo.temporal.TemporalElement;
-
-import java.io.Serializable;
+import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.java.tuple.Tuple2;
+import org.gradoop.common.model.api.entities.EPGMElement;
 
 /**
- * Map function to extract temporal information from an EPGM element to create a TPGM element
- * with a time interval as the elements validity.
+ * Map function to extract temporal information from an EPGM element to create a tuple of
+ * {@link Long} values as the elements validity interval.
  *
  * @param <E> the EPGM element type
  */
-public interface TimeIntervalExtractor<E extends Element> extends Serializable {
-  /**
-   * Function to extract the beginning of the elements validity as unix timestamp in milliseconds.
-   *
-   * @param element the element to extract the temporal information from
-   * @return the beginning of the elements validity as unix timestamp in milliseconds
-   */
-  Long getValidFrom(E element);
+public interface TimeIntervalExtractor<E extends EPGMElement>
+  extends MapFunction<E, Tuple2<Long, Long>> {
 
-  /**
-   * Function to extract the end of the elements validity as unix timestamp in milliseconds. The
-   * default is {@link TemporalElement#DEFAULT_VALID_TIME}.
-   *
-   * @param element the element to extract the temporal information from
-   * @return the end of the elements validity as unix timestamp in milliseconds
-   */
-  default Long getValidTo(E element) {
-    return TemporalElement.DEFAULT_VALID_TIME;
-  }
 }

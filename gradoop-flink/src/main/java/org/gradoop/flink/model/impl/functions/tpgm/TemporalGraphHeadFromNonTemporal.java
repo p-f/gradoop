@@ -70,15 +70,15 @@ public class TemporalGraphHeadFromNonTemporal implements MapFunction<GraphHead, 
    *
    * @param value the non-temporal element
    * @return the temporal element
+   * @throws Exception on failure
    */
   @Override
-  public TemporalGraphHead map(GraphHead value) {
+  public TemporalGraphHead map(GraphHead value) throws Exception {
     reuse.setId(value.getId());
     reuse.setLabel(value.getLabel());
     reuse.setProperties(value.getProperties());
     if (timeIntervalExtractor != null) {
-      reuse.setValidFrom(timeIntervalExtractor.getValidFrom(value));
-      reuse.setValidTo(timeIntervalExtractor.getValidTo(value));
+      reuse.setValidTime(timeIntervalExtractor.map(value));
     }
     return reuse;
   }

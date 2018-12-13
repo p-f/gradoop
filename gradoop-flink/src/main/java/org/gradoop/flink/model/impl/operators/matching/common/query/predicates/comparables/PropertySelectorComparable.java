@@ -17,7 +17,6 @@ package org.gradoop.flink.model.impl.operators.matching.common.query.predicates.
 
 import com.google.common.collect.Sets;
 import org.gradoop.common.model.api.entities.EPGMGraphElement;
-import org.gradoop.common.model.impl.pojo.GraphElement;
 import org.gradoop.common.model.impl.properties.PropertyValue;
 import org.gradoop.flink.model.impl.operators.matching.common.query.predicates.QueryComparable;
 import org.gradoop.flink.model.impl.operators.matching.single.cypher.pojos.Embedding;

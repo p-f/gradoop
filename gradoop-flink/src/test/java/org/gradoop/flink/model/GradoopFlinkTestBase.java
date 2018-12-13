@@ -17,6 +17,7 @@ package org.gradoop.flink.model;
 
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
+import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.runtime.minicluster.LocalFlinkMiniCluster;
 import org.apache.flink.test.util.TestEnvironment;
@@ -207,6 +208,38 @@ public abstract class GradoopFlinkTestBase {
     InputStream inputStream = getClass()
       .getResourceAsStream(GradoopTestUtils.SOCIAL_NETWORK_GDL_FILE);
     return getLoaderFromStream(inputStream);
+  }
+
+  protected FlinkAsciiGraphLoader getTemporalSocialNetworkLoader() throws IOException {
+    InputStream inputStream = getClass()
+      .getResourceAsStream(GradoopTestUtils.SOCIAL_NETWORK_TEMPORAL_GDL_FILE);
+    return getLoaderFromStream(inputStream);
+  }
+
+  public static Tuple2<Long, Long> extractGraphHeadTime(EPGMElement element) {
+    return extractTime(element);
+  }
+
+  public static Tuple2<Long, Long> extractVertexTime(EPGMElement element) {
+    return extractTime(element);
+  }
+
+  public static Tuple2<Long, Long> extractEdgeTime(EPGMElement element) {
+    return extractTime(element);
+  }
+
+
+  public static <E extends EPGMElement> Tuple2<Long, Long> extractTime(E element) {
+    Tuple2<Long, Long> validTime = new Tuple2<>(TemporalElement.DEFAULT_VALID_TIME,
+      TemporalElement.DEFAULT_VALID_TIME);
+
+    if (element.hasProperty("__valFrom")) {
+      validTime.f0 = element.getPropertyValue("__valFrom").getLong();
+    }
+    if (element.hasProperty("__valTo")) {
+      validTime.f1 = element.getPropertyValue("__valTo").getLong();
+    }
+    return validTime;
   }
 
   /**

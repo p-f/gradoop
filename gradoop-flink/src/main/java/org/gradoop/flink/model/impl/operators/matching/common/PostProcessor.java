@@ -47,53 +47,64 @@ public class PostProcessor {
   /**
    * Extracts a {@link GC} from a set of {@link EPGMElement}.
    *
-   * @param elements  EPGM elements
-   * @param factory
-   * @return Graph collection
+   * @param elements the EPGM element set
+   * @param factory the factory to create a graph collection
+   * @param <G> graph head type
+   * @param <V> vertex type
+   * @param <E> edge type
+   * @param <GC> graph collection type
+   * @return a graph collection containing the given elements
    */
   public static <
     G extends EPGMGraphHead,
     V extends EPGMVertex,
     E extends EPGMEdge,
-    GC extends BaseGraphCollection<G, V, E, GC>> GC extractGraphCollection(DataSet<EPGMElement> elements, BaseGraphCollectionFactory<G, V, E, GC> factory) {
+    GC extends BaseGraphCollection<G, V, E, GC>> GC extractGraphCollection(
+    DataSet<EPGMElement> elements, BaseGraphCollectionFactory<G, V, E, GC> factory) {
     return extractGraphCollection(elements, factory, true);
   }
 
   /**
    * Extracts a {@link GC} from a set of {@link EPGMElement}.
    *
-   * @param elements  EPGM elements
-   * @param factory
-   * @param mayOverlap    elements may be contained in multiple graphs
-   * @return Graph collection
+   * @param elements the EPGM elements
+   * @param factory the factory to create a graph collection
+   * @param mayOverlap true -> elements may be contained in multiple graphs
+   * @param <G> graph head type
+   * @param <V> vertex type
+   * @param <E> edge type
+   * @param <GC> graph collection type
+   * @return a graph collection containing the given elements
    */
-  @SuppressWarnings("unchecked")
   public static <
     G extends EPGMGraphHead,
     V extends EPGMVertex,
     E extends EPGMEdge,
-    LG extends BaseGraph<G, V, E, LG, GC>,
     GC extends BaseGraphCollection<G, V, E, GC>> GC extractGraphCollection(
-    DataSet<EPGMElement> elements, BaseGraphCollectionFactory<G, V, E, GC> factory, boolean mayOverlap) {
+    DataSet<EPGMElement> elements, BaseGraphCollectionFactory<G, V, E, GC> factory,
+    boolean mayOverlap) {
 
     Class<G> graphHeadType = factory.getGraphHeadFactory().getType();
     Class<V> vertexType = factory.getVertexFactory().getType();
     Class<E> edgeType = factory.getEdgeFactory().getType();
-    return factory.fromDataSets(
-      extractGraphHeads(elements, graphHeadType),
+    return factory.fromDataSets(extractGraphHeads(elements, graphHeadType),
       extractVertices(elements, vertexType, mayOverlap),
-      extractEdges(elements, edgeType, mayOverlap)
-    );
+      extractEdges(elements, edgeType, mayOverlap));
   }
 
   /**
-   * Extracts a {@link GC} from a set of {@link EPGMElement} and
-   * attaches the original data from the input {@link LG}.
+   * Extracts a {@link GC} from a set of {@link EPGMElement} and attaches the original data from
+   * the input {@link LG}.
    *
-   * @param elements      EPGM elements
-   * @param inputGraph    original input graph
-   * @param mayOverlap    true, if elements may be contained in multiple graphs
-   * @return Graph collection
+   * @param elements the EPGM elements
+   * @param inputGraph the input graph instance
+   * @param mayOverlap true -> elements may be contained in multiple graphs
+   * @param <G> graph head type
+   * @param <V> vertex type
+   * @param <E> edge type
+   * @param <LG> graph type
+   * @param <GC> collection type
+   * @return a graph collection
    */
   public static <
     G extends EPGMGraphHead,
@@ -107,30 +118,27 @@ public class PostProcessor {
     GC collection = extractGraphCollection(elements, inputGraph.getCollectionFactory(), mayOverlap);
 
     // attach data by joining first and merging the graph head ids
-    DataSet<V> newVertices = inputGraph.getVertices()
-      .rightOuterJoin(collection.getVertices())
-      .where(new Id<>()).equalTo(new Id<>())
-      .with(new MergedGraphIds<>())
-      .withForwardedFieldsFirst("id;label;properties;");
+    DataSet<V> newVertices =
+      inputGraph.getVertices().rightOuterJoin(collection.getVertices()).where(new Id<>())
+        .equalTo(new Id<>()).with(new MergedGraphIds<>())
+        .withForwardedFieldsFirst("id;label;properties;");
 
 
-    DataSet<E> newEdges = inputGraph.getEdges()
-      .rightOuterJoin(collection.getEdges())
-      .where(new Id<>()).equalTo(new Id<>())
-      .with(new MergedGraphIds<>())
-      .withForwardedFieldsFirst("id;label;properties");
+    DataSet<E> newEdges =
+      inputGraph.getEdges().rightOuterJoin(collection.getEdges()).where(new Id<>())
+        .equalTo(new Id<>()).with(new MergedGraphIds<>())
+        .withForwardedFieldsFirst("id;label;properties");
 
-    return collection.getFactory().fromDataSets(
-      collection.getGraphHeads(), newVertices, newEdges);
+    return collection.getFactory().fromDataSets(collection.getGraphHeads(), newVertices, newEdges);
   }
+
   /**
    * Extracts vertex ids from the given pattern matching result.
    *
    * @param result pattern matching result
    * @return dataset with (vertexId) tuples
    */
-  public static DataSet<Tuple1<GradoopId>> extractVertexIds(
-    DataSet<FatVertex> result) {
+  private static DataSet<Tuple1<GradoopId>> extractVertexIds(DataSet<FatVertex> result) {
     return result.project(0);
   }
 
@@ -141,7 +149,7 @@ public class PostProcessor {
    * @param result pattern matching result
    * @return dataset with (edgeId, sourceId, targetId) tuples
    */
-  public static DataSet<Tuple3<GradoopId, GradoopId, GradoopId>> extractEdgeIds(
+  private static DataSet<Tuple3<GradoopId, GradoopId, GradoopId>> extractEdgeIds(
     DataSet<FatVertex> result) {
     return result.flatMap(new EdgeTriple());
   }
@@ -151,54 +159,52 @@ public class PostProcessor {
    *
    * @param elements      EPGM elements
    * @param graphHeadType graph head type
+   * @param <G> graph head type
    * @return EPGM graph heads
    */
-  public static <G extends EPGMGraphHead> DataSet<G> extractGraphHeads(DataSet<EPGMElement> elements,
-    Class<G> graphHeadType) {
-    return elements
-      .filter(new IsInstance<>(graphHeadType))
-      .map(new Cast<>(graphHeadType))
+  private static <G extends EPGMGraphHead> DataSet<G> extractGraphHeads(
+    DataSet<EPGMElement> elements, Class<G> graphHeadType) {
+    return elements.filter(new IsInstance<>(graphHeadType)).map(new Cast<>(graphHeadType))
       .returns(TypeExtractor.createTypeInfo(graphHeadType));
   }
 
   /**
    * Initializes EPGM vertices from the given pattern matching result.
    *
-   * @param result        pattern matching result
+   * @param result            pattern matching result
    * @param epgmVertexFactory EPGM vertex factory
+   * @param <V> vertex type
    * @return EPGM vertices
    */
   public static <V extends EPGMVertex> DataSet<V> extractVertices(DataSet<FatVertex> result,
-                                                EPGMVertexFactory<V> epgmVertexFactory) {
+    EPGMVertexFactory<V> epgmVertexFactory) {
     return extractVertexIds(result).map(new VertexFromId<>(epgmVertexFactory));
   }
 
   /**
    * Filters and casts EPGM vertices from a given set of {@link EPGMElement}
    *
-   * @param elements  EPGM elements
-   * @param vertexType    vertex type
-   * @param mayOverlap    vertices may be contained in multiple graphs
+   * @param elements   EPGM elements
+   * @param vertexType vertex type
+   * @param mayOverlap vertices may be contained in multiple graphs
+   * @param <V> vertex type
    * @return EPGM vertices
    */
-  public static <V extends EPGMVertex> DataSet<V> extractVertices(DataSet<EPGMElement> elements,
+  private static <V extends EPGMVertex> DataSet<V> extractVertices(DataSet<EPGMElement> elements,
     Class<V> vertexType, boolean mayOverlap) {
-    DataSet<V> result = elements
-      .filter(new IsInstance<>(vertexType))
-      .map(new Cast<>(vertexType))
+    DataSet<V> result = elements.filter(new IsInstance<>(vertexType)).map(new Cast<>(vertexType))
       .returns(TypeExtractor.createTypeInfo(vertexType));
-    return mayOverlap ? result
-      .groupBy(new Id<>())
-      .combineGroup(new MergedGraphIds<>())
-      .groupBy(new Id<>())
-      .reduceGroup(new MergedGraphIds<>()) : result;
+    return mayOverlap ?
+      result.groupBy(new Id<>()).combineGroup(new MergedGraphIds<>()).groupBy(new Id<>())
+        .reduceGroup(new MergedGraphIds<>()) : result;
   }
 
   /**
    * Initializes EPGM edges from the given pattern matching result.
    *
-   * @param result      pattern matching result
+   * @param result          pattern matching result
    * @param epgmEdgeFactory EPGM edge factory
+   * @param <E> edge type
    * @return EPGM edges
    */
   public static <E extends EPGMEdge> DataSet<E> extractEdges(DataSet<FatVertex> result,
@@ -209,22 +215,20 @@ public class PostProcessor {
   /**
    * Filters and casts EPGM edges from a given set of {@link EPGMElement}
    *
-   * @param elements      EPGM elements
-   * @param edgeType      edge type
-   * @param mayOverlap    edges may be contained in multiple graphs
+   * @param elements   EPGM elements
+   * @param edgeType   edge type
+   * @param mayOverlap edges may be contained in multiple graphs
+   * @param <E> edge type
    * @return EPGM edges
    */
-  public static <E extends EPGMEdge> DataSet<E> extractEdges(DataSet<EPGMElement> elements,
+  private static <E extends EPGMEdge> DataSet<E> extractEdges(DataSet<EPGMElement> elements,
     Class<E> edgeType, boolean mayOverlap) {
-    DataSet<E> result = elements
-      .filter(new IsInstance<>(edgeType))
-      .map(new Cast<>(edgeType))
+    DataSet<E> result = elements.filter(new IsInstance<>(edgeType)).map(new Cast<>(edgeType))
       .returns(TypeExtractor.createTypeInfo(edgeType));
 
-    return mayOverlap ? result
-      .groupBy(new Id<>())
-      .combineGroup(new MergedGraphIds<>()).groupBy(new Id<>())
-      .reduceGroup(new MergedGraphIds<>()) : result;
+    return mayOverlap ?
+      result.groupBy(new Id<>()).combineGroup(new MergedGraphIds<>()).groupBy(new Id<>())
+        .reduceGroup(new MergedGraphIds<>()) : result;
   }
 
   /**
@@ -233,13 +237,12 @@ public class PostProcessor {
    *
    * @param result        pattern matching result
    * @param inputVertices original data graph vertices
+   * @param <V> vertex type
    * @return EPGM vertices including data
    */
-  public static <V extends EPGMVertex> DataSet<V> extractVerticesWithData(
-    DataSet<FatVertex> result, DataSet<V> inputVertices) {
-    return extractVertexIds(result)
-      .join(inputVertices)
-      .where(0).equalTo(new Id<>())
+  public static <V extends EPGMVertex> DataSet<V> extractVerticesWithData(DataSet<FatVertex> result,
+    DataSet<V> inputVertices) {
+    return extractVertexIds(result).join(inputVertices).where(0).equalTo(new Id<>())
       .with(new RightSide<>());
   }
 
@@ -247,15 +250,14 @@ public class PostProcessor {
    * Initializes EPGM edges including their original data from the given pattern
    * matching result.
    *
-   * @param result      pattern matching result
-   * @param inputEdges  original data graph edges
+   * @param result     pattern matching result
+   * @param inputEdges original data graph edges
+   * @param <E> edge type
    * @return EPGM edges including data
    */
   public static <E extends EPGMEdge> DataSet<E> extractEdgesWithData(DataSet<FatVertex> result,
     DataSet<E> inputEdges) {
-    return extractEdgeIds(result)
-      .join(inputEdges)
-      .where(0).equalTo(new Id<>())
+    return extractEdgeIds(result).join(inputEdges).where(0).equalTo(new Id<>())
       .with(new RightSide<>());
   }
 }

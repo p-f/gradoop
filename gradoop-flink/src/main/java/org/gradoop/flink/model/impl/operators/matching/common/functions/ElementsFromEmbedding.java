@@ -42,6 +42,10 @@ import java.util.stream.Collectors;
 
 /**
  * Extracts {@link EPGMElement} instances from an {@link Embedding}.
+ *
+ * @param <G> graph head type
+ * @param <V> vertex type
+ * @param <E> edge type
  */
 public class ElementsFromEmbedding<G extends EPGMGraphHead, V extends EPGMVertex, E extends EPGMEdge>
   extends RichFlatMapFunction<Tuple1<Embedding<GradoopId>>, EPGMElement> {

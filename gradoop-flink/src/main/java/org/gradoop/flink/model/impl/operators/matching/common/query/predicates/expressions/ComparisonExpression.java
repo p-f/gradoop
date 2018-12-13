@@ -16,7 +16,6 @@
 package org.gradoop.flink.model.impl.operators.matching.common.query.predicates.expressions;
 
 import org.gradoop.common.model.api.entities.EPGMGraphElement;
-import org.gradoop.common.model.impl.pojo.GraphElement;
 import org.gradoop.common.model.impl.properties.PropertyValue;
 import org.gradoop.flink.model.impl.operators.matching.common.query.predicates.CNF;
 import org.gradoop.flink.model.impl.operators.matching.common.query.predicates.CNFElement;

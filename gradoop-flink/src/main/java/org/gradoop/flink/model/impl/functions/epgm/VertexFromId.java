@@ -27,6 +27,8 @@ import org.gradoop.common.model.impl.id.GradoopId;
 
 /**
  * Initializes an {@link EPGMVertex} from a given {@link GradoopId}.
+ *
+ * @param <V> vertex type
  */
 @FunctionAnnotation.ForwardedFields("f0->id")
 public class VertexFromId<V extends EPGMVertex> implements
@@ -52,7 +54,7 @@ public class VertexFromId<V extends EPGMVertex> implements
    *
    * @param gradoopId Gradoop identifier
    * @return EPGM vertex
-   * @throws Exception
+   * @throws Exception on failure
    */
   @Override
   public V map(Tuple1<GradoopId> gradoopId) throws Exception {

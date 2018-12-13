@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014 - 2019 Leipzig University (Database Research Group)
+ * Copyright © 2014 - 2018 Leipzig University (Database Research Group)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,10 @@ package org.gradoop.flink.model.impl.operators.transformation;
 
 import com.google.common.collect.Lists;
 import org.apache.flink.api.java.io.LocalCollectionOutputFormat;
-import org.gradoop.common.model.api.entities.EPGMEdge;
-import org.gradoop.common.model.api.entities.EPGMGraphHead;
-import org.gradoop.common.model.api.entities.EPGMVertex;
 import org.gradoop.common.model.impl.id.GradoopId;
-import org.gradoop.flink.model.GradoopFlinkTestBase;
 import org.gradoop.flink.model.impl.epgm.LogicalGraph;
 import org.gradoop.flink.model.impl.functions.epgm.Id;
+import org.gradoop.flink.model.impl.tpgm.TemporalGraph;
 import org.gradoop.flink.util.FlinkAsciiGraphLoader;
 import org.junit.Test;
 
@@ -31,49 +28,7 @@ import java.util.List;
 
 import static org.gradoop.common.GradoopTestUtils.validateIdEquality;
 
-public class TransformationTest extends GradoopFlinkTestBase {
-
-  final String testGraphString = "" +
-    "g0:A  { a : 1 } [(:A { a : 1, b : 2 })-[:a { a : 1, b : 2 }]->(:B { c : 2 })]" +
-    "g1:B  { a : 2 } [(:A { a : 2, b : 2 })-[:a { a : 2, b : 2 }]->(:B { c : 3 })]" +
-    // full graph transformation
-    "g01:A { a : 2 } [(:A { a : 2, b : 1 })-->(:B { d : 2 })]" +
-    "g11:B { a : 3 } [(:A { a : 3, b : 1 })-->(:B { d : 3 })]" +
-    // graph head only transformation
-    "g02:A { a : 2 } [(:A { a : 1, b : 2 })-[:a { a : 1, b : 2 }]->(:B { c : 2 })]" +
-    "g12:B { a : 3 } [(:A { a : 2, b : 2 })-[:a { a : 2, b : 2 }]->(:B { c : 3 })]" +
-    // vertex only transformation
-    "g03:A { a : 1 } [(:A { a : 2, b : 1 })-[:a { a : 1, b : 2 }]->(:B { d : 2 })]" +
-    "g13:B { a : 2 } [(:A { a : 3, b : 1 })-[:a { a : 2, b : 2 }]->(:B { d : 3 })]" +
-    // edge only transformation
-    "g04:A { a : 1 } [(:A { a : 1, b : 2 })-->(:B { c : 2 })]" +
-    "g14:B { a : 2 } [(:A { a : 2, b : 2 })-->(:B { c : 3 })]";
-
-  static <G extends EPGMGraphHead> G transformGraphHead(G current, G transformed) {
-    transformed.setLabel(current.getLabel());
-    transformed.setProperty("a", current.getPropertyValue("a").getInt() + 1);
-    return transformed;
-  }
-
-  static <V extends EPGMVertex> V transformVertex(V current, V transformed) {
-    transformed.setLabel(current.getLabel());
-    if (current.getLabel().equals("A")) {
-      transformed.setProperty("a", current.getPropertyValue("a").getInt() + 1);
-      transformed.setProperty("b", current.getPropertyValue("b").getInt() - 1);
-    } else if (current.getLabel().equals("B")) {
-      transformed.setProperty("d", current.getPropertyValue("c"));
-    }
-    return transformed;
-  }
-
-  static <E extends EPGMEdge> E transformEdge(E current, E transformed) {
-    return transformed;
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void testMissingFunctions() {
-    new Transformation<>(null, null, null);
-  }
+public class TPGMTransformationTest extends TransformationTest {
 
   @Test
   public void testIdEquality() throws Exception {
@@ -83,7 +38,7 @@ public class TransformationTest extends GradoopFlinkTestBase {
     List<GradoopId> expectedVertexIds = Lists.newArrayList();
     List<GradoopId> expectedEdgeIds = Lists.newArrayList();
 
-    LogicalGraph inputGraph = loader.getLogicalGraphByVariable("g0");
+    TemporalGraph inputGraph = loader.getLogicalGraphByVariable("g0").toTemporalGraph();
 
     inputGraph.getGraphHead().map(new Id<>()).output(
       new LocalCollectionOutputFormat<>(expectedGraphHeadIds));
@@ -96,8 +51,8 @@ public class TransformationTest extends GradoopFlinkTestBase {
       .transform(
         TransformationTest::transformGraphHead,
         TransformationTest::transformVertex,
-        TransformationTest::transformEdge
-      );
+        TransformationTest::transformEdge)
+      .toLogicalGraph();
 
     List<GradoopId> resultGraphHeadIds = Lists.newArrayList();
     List<GradoopId> resultVertexIds = Lists.newArrayList();
@@ -120,15 +75,16 @@ public class TransformationTest extends GradoopFlinkTestBase {
     validateIdEquality(expectedEdgeIds, resultEdgeIds);
   }
 
-
   /**
    * Tests the data in the resulting graph.
+   *
+   * @throws Exception on failure
    */
   @Test
   public void testDataEquality() throws Exception {
     FlinkAsciiGraphLoader loader = getLoaderFromString(testGraphString);
 
-    LogicalGraph original = loader.getLogicalGraphByVariable("g0");
+    TemporalGraph original = loader.getLogicalGraphByVariable("g0").toTemporalGraph();
 
     LogicalGraph expected = loader.getLogicalGraphByVariable("g01");
 
@@ -136,8 +92,8 @@ public class TransformationTest extends GradoopFlinkTestBase {
       .transform(
         TransformationTest::transformGraphHead,
         TransformationTest::transformVertex,
-        TransformationTest::transformEdge
-      );
+        TransformationTest::transformEdge)
+      .toLogicalGraph();
 
     collectAndAssertTrue(result.equalsByData(expected));
   }
@@ -146,11 +102,13 @@ public class TransformationTest extends GradoopFlinkTestBase {
   public void testGraphHeadOnlyTransformation() throws Exception {
     FlinkAsciiGraphLoader loader = getLoaderFromString(testGraphString);
 
-    LogicalGraph original = loader.getLogicalGraphByVariable("g0");
+    TemporalGraph original = loader.getLogicalGraphByVariable("g0").toTemporalGraph();
 
     LogicalGraph expected = loader.getLogicalGraphByVariable("g02");
 
-    LogicalGraph result = original.transformGraphHead(TransformationTest::transformGraphHead);
+    LogicalGraph result = original
+      .transformGraphHead(TransformationTest::transformGraphHead)
+      .toLogicalGraph();
 
     collectAndAssertTrue(result.equalsByData(expected));
   }
@@ -159,11 +117,13 @@ public class TransformationTest extends GradoopFlinkTestBase {
   public void testVertexOnlyTransformation() throws Exception {
     FlinkAsciiGraphLoader loader = getLoaderFromString(testGraphString);
 
-    LogicalGraph original = loader.getLogicalGraphByVariable("g0");
+    TemporalGraph original = loader.getLogicalGraphByVariable("g0").toTemporalGraph();
 
     LogicalGraph expected = loader.getLogicalGraphByVariable("g03");
 
-    LogicalGraph result = original.transformVertices(TransformationTest::transformVertex);
+    LogicalGraph result = original
+      .transformVertices(TransformationTest::transformVertex)
+      .toLogicalGraph();
 
     collectAndAssertTrue(result.equalsByData(expected));
   }
@@ -172,14 +132,14 @@ public class TransformationTest extends GradoopFlinkTestBase {
   public void testEdgeOnlyTransformation() throws Exception {
     FlinkAsciiGraphLoader loader = getLoaderFromString(testGraphString);
 
-    LogicalGraph original = loader.getLogicalGraphByVariable("g0");
+    TemporalGraph original = loader.getLogicalGraphByVariable("g0").toTemporalGraph();
 
     LogicalGraph expected = loader.getLogicalGraphByVariable("g04");
 
-    LogicalGraph result = original.transformEdges(TransformationTest::transformEdge);
+    LogicalGraph result = original
+      .transformEdges(TransformationTest::transformEdge)
+      .toLogicalGraph();
 
     collectAndAssertTrue(result.equalsByData(expected));
   }
-
-
 }

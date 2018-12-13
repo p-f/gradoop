@@ -20,10 +20,10 @@ import com.google.common.collect.Sets;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.io.LocalCollectionOutputFormat;
+import org.apache.flink.api.java.tuple.Tuple2;
 import org.gradoop.common.GradoopTestUtils;
 import org.gradoop.common.model.api.entities.EPGMEdge;
 import org.gradoop.common.model.api.entities.EPGMElement;
-import org.gradoop.common.model.api.entities.EPGMGraphElement;
 import org.gradoop.common.model.api.entities.EPGMGraphHead;
 import org.gradoop.common.model.api.entities.EPGMVertex;
 import org.gradoop.common.model.impl.id.GradoopId;
@@ -165,17 +165,6 @@ public class GradoopFlinkTestUtils {
     GradoopTestUtils.validateEPGMElementCollections(a.getEdges(), b.getEdges());
   }
 
-  private static void assertEqualEdges(EPGMEdge a, EPGMEdge b) {
-    Assert.assertEquals(a.getSourceId(), b.getSourceId());
-    Assert.assertEquals(a.getTargetId(), b.getTargetId());
-    assertEqualGraphElements(a, b);
-  }
-
-  private static void assertEqualGraphElements(EPGMGraphElement a, EPGMGraphElement b) {
-    Assert.assertEquals(a.getGraphIds(), b.getGraphIds());
-    assertEqualElements(a, b);
-  }
-
   private static void assertEqualElements(EPGMElement a, EPGMElement b) {
     Assert.assertEquals(a.getId(), b.getId());
     Assert.assertEquals(a.getLabel(), b.getLabel());
@@ -259,14 +248,10 @@ public class GradoopFlinkTestUtils {
    */
   private static class TestGraphHeadTimeIntervalExtractor
     implements TimeIntervalExtractor<GraphHead> {
-    @Override
-    public Long getValidFrom(GraphHead element) {
-      return 42L;
-    }
 
     @Override
-    public Long getValidTo(GraphHead element) {
-      return 52L;
+    public Tuple2<Long, Long> map(GraphHead graphHead) {
+      return new Tuple2<>(42L, 52L);
     }
   }
 
@@ -274,14 +259,10 @@ public class GradoopFlinkTestUtils {
    * Test class for time interval extraction.
    */
   private static class TestVertexTimeIntervalExtractor implements TimeIntervalExtractor<Vertex> {
-    @Override
-    public Long getValidFrom(Vertex element) {
-      return 52L;
-    }
 
     @Override
-    public Long getValidTo(Vertex element) {
-      return 62L;
+    public Tuple2<Long, Long> map(Vertex vertex) {
+      return new Tuple2<>(52L, 62L);
     }
   }
 
@@ -289,14 +270,10 @@ public class GradoopFlinkTestUtils {
    * Test class for time interval extraction.
    */
   private static class TestEdgeTimeIntervalExtractor implements TimeIntervalExtractor<Edge> {
-    @Override
-    public Long getValidFrom(Edge element) {
-      return 62L;
-    }
 
     @Override
-    public Long getValidTo(Edge element) {
-      return 72L;
+    public Tuple2<Long, Long> map(Edge edge) {
+      return new Tuple2<>(62L, 72L);
     }
   }
 }

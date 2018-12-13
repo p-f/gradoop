@@ -69,6 +69,7 @@ import static org.gradoop.flink.model.impl.operators.matching.single.cypher.plan
  * @param <V> type of the vertex
  * @param <E> type of the edge
  * @param <LG> type of the graph instance
+ * @param <GC> type of the graph collection instance
  */
 public class GreedyPlanner<
   G extends EPGMGraphHead,
