@@ -18,9 +18,14 @@ package org.gradoop.flink.model.impl.operators.matching.single.simulation.dual;
 import org.gradoop.common.model.impl.pojo.Edge;
 import org.gradoop.common.model.impl.pojo.GraphHead;
 import org.gradoop.common.model.impl.pojo.Vertex;
+import org.gradoop.common.model.impl.pojo.temporal.TemporalEdge;
+import org.gradoop.common.model.impl.pojo.temporal.TemporalGraphHead;
+import org.gradoop.common.model.impl.pojo.temporal.TemporalVertex;
 import org.gradoop.flink.model.impl.epgm.GraphCollection;
 import org.gradoop.flink.model.impl.epgm.LogicalGraph;
 import org.gradoop.flink.model.impl.operators.matching.single.PatternMatching;
+import org.gradoop.flink.model.impl.tpgm.TemporalGraph;
+import org.gradoop.flink.model.impl.tpgm.TemporalGraphCollection;
 
 public class DualSimulationBulkTest extends DualSimulationTest {
 
@@ -37,5 +42,11 @@ public class DualSimulationBulkTest extends DualSimulationTest {
   getImplementation(String queryGraph,
     boolean attachData) {
     return new DualSimulation(queryGraph, attachData, true);
+  }
+
+  @Override
+  public PatternMatching<TemporalGraphHead, TemporalVertex, TemporalEdge, TemporalGraph, TemporalGraphCollection> getTemporalImplementation(
+    String queryGraph, boolean attachData) throws UnsupportedOperationException {
+    throw new UnsupportedOperationException();
   }
 }

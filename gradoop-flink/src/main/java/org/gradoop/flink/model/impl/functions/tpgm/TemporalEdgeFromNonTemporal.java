@@ -71,6 +71,7 @@ public class TemporalEdgeFromNonTemporal implements MapFunction<Edge, TemporalEd
    *
    * @param value the non-temporal element
    * @return the temporal element
+   * @throws Exception on failure
    */
   @Override
   public TemporalEdge map(Edge value) throws Exception {
@@ -81,8 +82,7 @@ public class TemporalEdgeFromNonTemporal implements MapFunction<Edge, TemporalEd
     reuse.setProperties(value.getProperties());
     reuse.setGraphIds(value.getGraphIds());
     if (timeIntervalExtractor != null) {
-      reuse.setValidFrom(timeIntervalExtractor.getValidFrom(value));
-      reuse.setValidTo(timeIntervalExtractor.getValidTo(value));
+      reuse.setValidTime(timeIntervalExtractor.map(value));
     }
     return reuse;
   }

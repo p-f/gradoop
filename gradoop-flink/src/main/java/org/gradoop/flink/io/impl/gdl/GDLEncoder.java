@@ -22,7 +22,6 @@ import org.gradoop.common.model.impl.id.GradoopId;
 import org.gradoop.common.model.impl.properties.Properties;
 import org.gradoop.common.model.impl.properties.Property;
 import org.gradoop.common.model.impl.properties.PropertyValue;
-import org.gradoop.flink.model.api.epgm.BaseGraphCollection;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,12 +32,15 @@ import java.util.stream.Collectors;
 
 /**
  * Encodes data structures using the GDL format.
+ *
+ * @param <G> graph head type
+ * @param <V> vertex type
+ * @param <E> edge type
  */
 public class GDLEncoder<
   G extends EPGMGraphHead,
   V extends EPGMVertex,
-  E extends EPGMEdge,
-  GC extends BaseGraphCollection<G, V, E, GC>> {
+  E extends EPGMEdge> {
   /**
    * Marks the beginning of the definition of vertices and edges.
    */

@@ -15,6 +15,7 @@
  */
 package org.gradoop.flink.model.impl.tpgm;
 
+import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.util.Preconditions;
 import org.gradoop.common.model.impl.pojo.temporal.TemporalEdge;
@@ -24,7 +25,9 @@ import org.gradoop.flink.io.api.DataSink;
 import org.gradoop.flink.model.api.epgm.BaseGraph;
 import org.gradoop.flink.model.api.epgm.BaseGraphCollectionFactory;
 import org.gradoop.flink.model.api.epgm.BaseGraphFactory;
+import org.gradoop.flink.model.api.functions.TransformationFunction;
 import org.gradoop.flink.model.api.layouts.LogicalGraphLayout;
+import org.gradoop.flink.model.api.operators.UnaryBaseGraphToBaseCollectionOperator;
 import org.gradoop.flink.model.api.operators.UnaryBaseGraphToBaseGraphOperator;
 import org.gradoop.flink.model.api.tpgm.TemporalGraphOperators;
 import org.gradoop.flink.model.impl.epgm.LogicalGraph;
@@ -34,7 +37,14 @@ import org.gradoop.flink.model.impl.functions.bool.True;
 import org.gradoop.flink.model.impl.functions.epgm.EdgeFromTemporal;
 import org.gradoop.flink.model.impl.functions.epgm.GraphHeadFromTemporal;
 import org.gradoop.flink.model.impl.functions.epgm.VertexFromTemporal;
+import org.gradoop.flink.model.impl.operators.matching.common.MatchStrategy;
+import org.gradoop.flink.model.impl.operators.matching.common.statistics.GraphStatistics;
+import org.gradoop.flink.model.impl.operators.matching.single.cypher.CypherPatternMatching;
+import org.gradoop.flink.model.impl.operators.subgraph.Subgraph;
+import org.gradoop.flink.model.impl.operators.transformation.Transformation;
 import org.gradoop.flink.util.GradoopFlinkConfig;
+
+import java.util.Objects;
 
 /**
  * A temporal (logical) graph is a base concept of the Temporal Property Graph Model (TPGM) that
@@ -55,9 +65,8 @@ import org.gradoop.flink.util.GradoopFlinkConfig;
  * Note that the {@link TemporalGraph} also implements that interface and just forward the calls to
  * the layout. This is just for convenience and API synchronicity.
  */
-public class TemporalGraph
-  implements BaseGraph<TemporalGraphHead, TemporalVertex, TemporalEdge, TemporalGraph, TemporalGraphCollection>,
-  TemporalGraphOperators {
+public class TemporalGraph implements BaseGraph<TemporalGraphHead, TemporalVertex, TemporalEdge,
+  TemporalGraph, TemporalGraphCollection>, TemporalGraphOperators {
 
   /**
    * Layout for that temporal graph.
@@ -86,13 +95,14 @@ public class TemporalGraph
   }
 
   @Override
-  public BaseGraphFactory<TemporalGraphHead, TemporalVertex, TemporalEdge, TemporalGraph, TemporalGraphCollection>
-  getFactory() {
+  public BaseGraphFactory<TemporalGraphHead, TemporalVertex, TemporalEdge, TemporalGraph,
+    TemporalGraphCollection> getFactory() {
     return this.config.getTemporalGraphFactory();
   }
 
   @Override
-  public BaseGraphCollectionFactory<TemporalGraphHead, TemporalVertex, TemporalEdge, TemporalGraphCollection> getCollectionFactory() {
+  public BaseGraphCollectionFactory<TemporalGraphHead, TemporalVertex, TemporalEdge,
+    TemporalGraphCollection> getCollectionFactory() {
     return this.config.getTemporalGraphCollectionFactory();
   }
 
@@ -151,11 +161,59 @@ public class TemporalGraph
   }
 
   //----------------------------------------------------------------------------
+  // Unary Operators
+  //----------------------------------------------------------------------------
+
+  @Override
+  public TemporalGraphCollection query(String query, String constructionPattern, boolean attachData,
+    MatchStrategy vertexStrategy, MatchStrategy edgeStrategy, GraphStatistics graphStatistics) {
+    return callForCollection(new CypherPatternMatching<>(query, constructionPattern, attachData,
+      vertexStrategy, edgeStrategy, graphStatistics));
+  }
+
+  @Override
+  public TemporalGraph vertexInducedSubgraph(FilterFunction<TemporalVertex> vertexFilterFunction) {
+    Objects.requireNonNull(vertexFilterFunction);
+    return callForGraph(
+      new Subgraph<>(vertexFilterFunction, null, Subgraph.Strategy.VERTEX_INDUCED));
+  }
+
+  @Override
+  public TemporalGraph edgeInducedSubgraph(FilterFunction<TemporalEdge> edgeFilterFunction) {
+    Objects.requireNonNull(edgeFilterFunction);
+    return callForGraph(new Subgraph<>(null, edgeFilterFunction, Subgraph.Strategy.EDGE_INDUCED));
+  }
+
+  @Override
+  public TemporalGraph subgraph(FilterFunction<TemporalVertex> vertexFilterFunction,
+    FilterFunction<TemporalEdge> edgeFilterFunction, Subgraph.Strategy strategy) {
+    return callForGraph(
+      new Subgraph<>(vertexFilterFunction, edgeFilterFunction, strategy));
+  }
+
+  @Override
+  public TemporalGraph transform(
+    TransformationFunction<TemporalGraphHead> graphHeadTransformationFunction,
+    TransformationFunction<TemporalVertex> vertexTransformationFunction,
+    TransformationFunction<TemporalEdge> edgeTransformationFunction) {
+    return callForGraph(new Transformation<>(
+      graphHeadTransformationFunction,
+      vertexTransformationFunction,
+      edgeTransformationFunction));
+  }
+
+  //----------------------------------------------------------------------------
   // Auxiliary Operators
   //----------------------------------------------------------------------------
 
   @Override
   public TemporalGraph callForGraph(UnaryBaseGraphToBaseGraphOperator<TemporalGraph> operator) {
+    return operator.execute(this);
+  }
+
+  @Override
+  public TemporalGraphCollection callForCollection(
+    UnaryBaseGraphToBaseCollectionOperator<TemporalGraph, TemporalGraphCollection> operator) {
     return operator.execute(this);
   }
 

@@ -18,7 +18,6 @@ package org.gradoop.flink.model.impl.operators.matching.single.cypher.operators.
 import org.apache.flink.api.common.functions.RichFlatMapFunction;
 import org.apache.flink.util.Collector;
 import org.gradoop.common.model.api.entities.EPGMEdge;
-import org.gradoop.common.model.impl.pojo.Edge;
 import org.gradoop.flink.model.impl.operators.matching.common.query.predicates.CNF;
 import org.gradoop.flink.model.impl.operators.matching.single.cypher.pojos.EmbeddingFactory;
 import org.gradoop.flink.model.impl.operators.matching.single.cypher.pojos.Embedding;
@@ -26,8 +25,10 @@ import org.gradoop.flink.model.impl.operators.matching.single.cypher.pojos.Embed
 import java.util.List;
 
 /**
- * Applies a given predicate on a {@link Edge} and projects specified property values to the
+ * Applies a given predicate on a {@link EPGMEdge} and projects specified property values to the
  * output embedding.
+ *
+ * @param <E> edge type
  */
 public class FilterAndProjectEdge<E extends EPGMEdge> extends RichFlatMapFunction<E, Embedding> {
   /**
