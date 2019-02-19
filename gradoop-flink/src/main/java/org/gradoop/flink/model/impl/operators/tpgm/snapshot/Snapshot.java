@@ -73,15 +73,16 @@ public class Snapshot implements UnaryBaseGraphToBaseGraphOperator<TemporalGraph
       .map(new TemporalVertexToTempVertexTuple())
       .filter(retrievalOperator.getVertexFilterFunction());
     DataSet<TempEdgeTuple> edges =
-      superGraph.getEdges().map(new TemporalEdgeToTempEdgeTuple())
+      superGraph.getEdges()
+      .map(new TemporalEdgeToTempEdgeTuple())
       .filter(retrievalOperator.getEdgeFilterFunction());
 
     DataSet<Tuple2<Tuple2<TempEdgeTuple, TempVertexTuple>, TempVertexTuple>> verifiedTriples =
       edges
       .join(vertices)
-      .where("0.f1").equalTo("1.f0")
+      .where("f1").equalTo("f0")
       .join(vertices)
-      .where("0.f2").equalTo("1.f0");
+      .where("f0.f2").equalTo("f0");
 
     DataSet<TempEdgeTuple> verifiedEdges = verifiedTriples
       .map(new Value0Of2<>())
@@ -113,13 +114,13 @@ public class Snapshot implements UnaryBaseGraphToBaseGraphOperator<TemporalGraph
     DataSet<TemporalVertex> joinedVertices =
       originalVertices
       .joinWithTiny(vertices)
-      .where("0.id").equalTo("1.f0")
+      .where("id").equalTo("f0")
       .map(new Value0Of2<>());
 
     DataSet<TemporalEdge> joinedEdges =
       originalEdges
       .joinWithTiny(edges)
-      .where("0.id").equalTo("1.f0")
+      .where("id").equalTo("f0")
       .map(new Value0Of2<>());
 
     return superGraph.getFactory().fromDataSets(joinedVertices, joinedEdges);
