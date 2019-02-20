@@ -15,14 +15,14 @@
  */
 package org.gradoop.flink.model.api.epgm;
 
-
 import org.apache.flink.api.java.DataSet;
 import org.gradoop.common.model.api.entities.EPGMEdge;
 import org.gradoop.common.model.api.entities.EPGMGraphHead;
 import org.gradoop.common.model.api.entities.EPGMVertex;
 import org.gradoop.common.model.api.entities.ElementFactoryProvider;
 import org.gradoop.flink.model.api.layouts.GraphCollectionLayoutFactory;
-import org.gradoop.flink.model.impl.epgm.LogicalGraph;
+import org.gradoop.flink.model.api.layouts.LogicalGraphLayout;
+import org.gradoop.flink.model.impl.functions.epgm.Id;
 
 import java.util.Collection;
 import java.util.Map;
@@ -93,18 +93,42 @@ public interface BaseGraphCollectionFactory<
   /**
    * Creates a graph collection from a given logical graph.
    *
-   * @param logicalGraphLayout  input graph
+   * @param logicalGraphLayout input graph
    * @return 1-element graph collection
    */
-  GC fromGraph(LogicalGraph logicalGraphLayout);
+  GC fromGraph(LogicalGraphLayout<G, V, E> logicalGraphLayout);
 
   /**
    * Creates a graph collection from multiple given logical graphs.
    *
-   * @param logicalGraphLayout  input graphs
+   * @param logicalGraphLayouts input graphs
    * @return graph collection
    */
-  GC fromGraphs(LogicalGraph... logicalGraphLayout);
+  default GC fromGraphs(LogicalGraphLayout<G, V, E>... logicalGraphLayouts) {
+    if (logicalGraphLayouts.length != 0) {
+      DataSet<G> graphHeads = null;
+      DataSet<V> vertices = null;
+      DataSet<E> edges = null;
+
+      if (logicalGraphLayouts.length == 1) {
+        return fromGraph(logicalGraphLayouts[0]);
+      }
+
+      for (LogicalGraphLayout<G, V, E> logicalGraph : logicalGraphLayouts) {
+        graphHeads = (graphHeads == null) ?
+          logicalGraph.getGraphHead() : graphHeads.union(logicalGraph.getGraphHead());
+        vertices = (vertices == null) ?
+          logicalGraph.getVertices() : vertices.union(logicalGraph.getVertices());
+        edges = (edges == null) ?
+          logicalGraph.getEdges() : edges.union(logicalGraph.getEdges());
+      }
+      return fromDataSets(
+        graphHeads.distinct(new Id<>()),
+        vertices.distinct(new Id<>()),
+        edges.distinct(new Id<>()));
+    }
+    return createEmptyCollection();
+  }
 
   /**
    * Creates an empty graph collection.
