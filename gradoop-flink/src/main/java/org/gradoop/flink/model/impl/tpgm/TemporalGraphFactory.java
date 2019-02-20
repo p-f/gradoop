@@ -36,6 +36,7 @@ import org.gradoop.flink.model.impl.layouts.gve.temporal.TemporalGraphLayoutFact
 import org.gradoop.flink.util.GradoopFlinkConfig;
 
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * Responsible for creating instances of {@link TemporalGraph} based on a specific layout.
@@ -82,6 +83,19 @@ public class TemporalGraphFactory implements BaseGraphFactory<TemporalGraphHead,
   public TemporalGraph fromDataSets(DataSet<TemporalGraphHead> graphHead,
     DataSet<TemporalVertex> vertices, DataSet<TemporalEdge> edges) {
     return new TemporalGraph(this.layoutFactory.fromDataSets(graphHead, vertices, edges), config);
+  }
+
+  @Override
+  public TemporalGraph fromIndexedDataSets(Map<String, DataSet<TemporalVertex>> vertices,
+    Map<String, DataSet<TemporalEdge>> edges) {
+    return new TemporalGraph(this.layoutFactory.fromIndexedDataSets(vertices, edges), config);
+  }
+
+  @Override
+  public TemporalGraph fromIndexedDataSets(Map<String, DataSet<TemporalGraphHead>> graphHead,
+    Map<String, DataSet<TemporalVertex>> vertices, Map<String, DataSet<TemporalEdge>> edges) {
+    return new TemporalGraph(this.layoutFactory.fromIndexedDataSets(graphHead, vertices, edges),
+      config);
   }
 
   @Override
