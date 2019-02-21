@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014 - 2018 Leipzig University (Database Research Group)
+ * Copyright © 2014 - 2019 Leipzig University (Database Research Group)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,65 +20,60 @@ import org.apache.flink.api.java.tuple.Tuple4;
 import org.gradoop.common.model.impl.id.GradoopId;
 
 /**
- * (edgeId, sourceVertexId, targetVertexId, validTime)
+ * A simple tuple-based representation of a temporal edge containing its id, sourceId, targetId and
+ * valid time.
  */
 public class TempEdgeTuple extends Tuple4<GradoopId, GradoopId, GradoopId, Tuple2<Long, Long>>
   implements TempElementTuple {
 
   /**
-   * serial
-   */
-  private static final long serialVersionUID = 42L;
-
-  /**
-   * default constructor
+   * Constructor for serialization.
    */
   public TempEdgeTuple() {
+    super();
   }
 
   /**
-   * constructor with field values
+   * Constructor setting the fields of this tuple.
    *
-   * @param edgeId edge id
-   * @param sourceVertexId id of the source vertex
-   * @param targetVertexId id of the target vertex
-   * @param validTime valid time interval
+   * @param edgeId         The id of the edge.
+   * @param sourceVertexId The id of the source vertex.
+   * @param targetVertexId The id of the target vertex.
+   * @param validTime      The valid time of the edge.
    */
   public TempEdgeTuple(GradoopId edgeId, GradoopId sourceVertexId, GradoopId targetVertexId,
     Tuple2<Long, Long> validTime) {
-    this.f0 = edgeId;
-    this.f1 = sourceVertexId;
-    this.f2 = targetVertexId;
-    this.f3 = validTime;
+    super(edgeId, sourceVertexId, targetVertexId, validTime);
   }
 
   /**
-   * Get the gradoop id of the edge.
+   * Get the id of the edge.
    *
-   * @return the gradoop id of the edge
+   * @return The id of the edge.
    */
   public GradoopId getEdgeId() {
     return f0;
   }
 
   /**
-   * Get the gradoop id of the source vertex.
+   * Get the id of the source vertex.
    *
-   * @return the gradoop id of the source vertex
+   * @return The id of the source vertex.
    */
   public GradoopId getSourceVertexId() {
     return f1;
   }
 
   /**
-   * Get the gradoop id of the target vertex.
+   * Get the id of the target vertex.
    *
-   * @return the gradoop id of the target vertex
+   * @return The id of the target vertex.
    */
   public GradoopId getTargetVertexId() {
     return f2;
   }
 
+  @Override
   public Tuple2<Long, Long> getValidTime() {
     return f3;
   }

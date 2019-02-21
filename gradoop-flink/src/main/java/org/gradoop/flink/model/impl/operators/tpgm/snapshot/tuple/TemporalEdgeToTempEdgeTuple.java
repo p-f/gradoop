@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014 - 2018 Leipzig University (Database Research Group)
+ * Copyright © 2014 - 2019 Leipzig University (Database Research Group)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,19 +19,21 @@ import org.apache.flink.api.common.functions.MapFunction;
 import org.gradoop.common.model.impl.pojo.temporal.TemporalEdge;
 
 /**
- * TemporalEdge => TempEdgeTuple
+ * Creates a simpler tuple-based representation of a temporal edge.
  */
-public class TemporalEdgeToTempEdgeTuple
-  implements MapFunction<TemporalEdge, TempEdgeTuple> {
+public class TemporalEdgeToTempEdgeTuple implements MapFunction<TemporalEdge, TempEdgeTuple> {
 
   /**
-   * Serial.
+   * Reduce object instantiations.
    */
-  private static final long serialVersionUID = 42L;
+  private final TempEdgeTuple reuseTuple = new TempEdgeTuple();
 
   @Override
-  public TempEdgeTuple map(TemporalEdge value) throws Exception {
-    return new TempEdgeTuple(
-      value.getId(), value.getSourceId(), value.getTargetId(), value.getValidTime());
+  public TempEdgeTuple map(TemporalEdge value) {
+    reuseTuple.f0 = value.getId();
+    reuseTuple.f1 = value.getSourceId();
+    reuseTuple.f2 = value.getTargetId();
+    reuseTuple.f3 = value.getValidTime();
+    return reuseTuple;
   }
 }

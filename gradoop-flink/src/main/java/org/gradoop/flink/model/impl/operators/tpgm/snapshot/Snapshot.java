@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014 - 2018 Leipzig University (Database Research Group)
+ * Copyright © 2014 - 2019 Leipzig University (Database Research Group)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,40 +15,40 @@
  */
 package org.gradoop.flink.model.impl.operators.tpgm.snapshot;
 
-import java.util.Objects;
-
 import org.apache.flink.api.java.DataSet;
-import org.apache.flink.api.java.tuple.Tuple2;
 import org.gradoop.common.model.impl.pojo.temporal.TemporalEdge;
 import org.gradoop.common.model.impl.pojo.temporal.TemporalVertex;
 import org.gradoop.flink.model.api.operators.UnaryBaseGraphToBaseGraphOperator;
-import org.gradoop.flink.model.impl.functions.tuple.Value0Of2;
-import org.gradoop.flink.model.impl.functions.tuple.Value1Of2;
+import org.gradoop.flink.model.api.tpgm.functions.TemporalPredicate;
+import org.gradoop.flink.model.impl.functions.epgm.Id;
+import org.gradoop.flink.model.impl.functions.utils.LeftSide;
 import org.gradoop.flink.model.impl.operators.tpgm.snapshot.tuple.TempEdgeTuple;
 import org.gradoop.flink.model.impl.operators.tpgm.snapshot.tuple.TempVertexTuple;
 import org.gradoop.flink.model.impl.operators.tpgm.snapshot.tuple.TemporalEdgeToTempEdgeTuple;
 import org.gradoop.flink.model.impl.operators.tpgm.snapshot.tuple.TemporalVertexToTempVertexTuple;
 import org.gradoop.flink.model.impl.tpgm.TemporalGraph;
 
+import java.util.Objects;
+
 /**
- * Extracts a snapshot of a temporal graph using the given retrieval operator.
+ * Extracts a snapshot of a temporal graph using a given temporal predicate.
+ * This will calculate the subgraph of a temporal graph induced by the predicate.
+ * The resulting graph will be verified, i.e. dangling edges will be removed.
  */
 public class Snapshot implements UnaryBaseGraphToBaseGraphOperator<TemporalGraph> {
 
   /**
-   * Used retrieval operator.
+   * Used temporal predicate.
    */
-  private final RetrievalOperator retrievalOperator;
+  private final TemporalPredicate temporalPredicate;
 
   /**
-   * Creates an instance of the snapshot operator with the given retrieval operator.
+   * Creates an instance of the snapshot operator with the given temporal predicate.
    *
-   * @param retrievalOperator the retrieval operator to be used
+   * @param predicate The temporal predicate.
    */
-  public Snapshot(RetrievalOperator retrievalOperator) {
-    Objects.requireNonNull(retrievalOperator, "No retrieval operator was given.");
-
-    this.retrievalOperator = retrievalOperator;
+  public Snapshot(TemporalPredicate predicate) {
+    temporalPredicate = Objects.requireNonNull(predicate, "No predicate was given.");
   }
 
   @Override
@@ -57,54 +57,35 @@ public class Snapshot implements UnaryBaseGraphToBaseGraphOperator<TemporalGraph
   }
 
   /**
-   * Returns the subgraph of the given temporal graph that is defined by the
-   * vertices that fulfil the vertex filter function and edges that fulfill
-   * the edge filter function.
+   * Returns the subgraph of the given temporal graph that is induced by the temporal predicate.
+   * <p>
+   * Note, that the operator does verify the consistency of the resulting graph.
    *
-   * Note, that the operator does verify the consistency of the resulting
-   * graph.
-   *
-   * @param superGraph supergraph
-   * @return subgraph
+   * @param superGraph The input graph.
+   * @return subgraph The resulting graph.
    */
   private TemporalGraph subgraphAndVerify(TemporalGraph superGraph) {
-    DataSet<TempVertexTuple> vertices =
-      superGraph.getVertices()
+    DataSet<TempVertexTuple> vertices = superGraph.getVertices()
       .map(new TemporalVertexToTempVertexTuple())
-      .filter(retrievalOperator.getVertexFilterFunction());
-    DataSet<TempEdgeTuple> edges =
-      superGraph.getEdges()
-      .map(new TemporalEdgeToTempEdgeTuple())
-      .filter(retrievalOperator.getEdgeFilterFunction());
+      .filter(new ByTemporalPredicate<>(temporalPredicate));
+    DataSet<TempEdgeTuple> edges = superGraph.getEdges().map(new TemporalEdgeToTempEdgeTuple())
+      .filter(new ByTemporalPredicate<>(temporalPredicate));
 
-    DataSet<Tuple2<Tuple2<TempEdgeTuple, TempVertexTuple>, TempVertexTuple>> verifiedTriples =
-      edges
-      .join(vertices)
-      .where("f1").equalTo("f0")
-      .join(vertices)
-      .where("f0.f2").equalTo("f0");
+    DataSet<TempEdgeTuple> verifiedEdges = edges
+      .join(vertices).where(1).equalTo(0).with(new LeftSide<>())
+      .join(vertices).where(2).equalTo(0).with(new LeftSide<>());
 
-    DataSet<TempEdgeTuple> verifiedEdges = verifiedTriples
-      .map(new Value0Of2<>())
-      .map(new Value0Of2<>());
-
-    DataSet<TempVertexTuple> verifiedVertices = verifiedTriples
-      .map(new Value0Of2<>())
-      .map(new Value1Of2<>())
-      .union(verifiedTriples.map(new Value1Of2<>()))
-      .distinct("f0");
-
-    return buildGraph(superGraph, verifiedVertices, verifiedEdges);
+    return buildGraph(superGraph, vertices, verifiedEdges);
   }
 
   /**
    * Joins the given TempVertexTuple and TempEdgeTuple DataSets with the vertex and egde DataSets
    * of the original graph and returns a TemporalGraph object.
    *
-   * @param superGraph supergraph
-   * @param vertices filtered vertices
-   * @param edges filtered edges
-   * @return subgraph
+   * @param superGraph The original graph.
+   * @param vertices   The filtered vertices.
+   * @param edges      The filtered and verified edges.
+   * @return subgraph  A graph from the original graph containing only the filtered elements.
    */
   private TemporalGraph buildGraph(TemporalGraph superGraph, DataSet<TempVertexTuple> vertices,
     DataSet<TempEdgeTuple> edges) {
@@ -112,22 +93,11 @@ public class Snapshot implements UnaryBaseGraphToBaseGraphOperator<TemporalGraph
     DataSet<TemporalEdge> originalEdges = superGraph.getEdges();
 
     DataSet<TemporalVertex> joinedVertices =
-      originalVertices
-      .joinWithTiny(vertices)
-      .where("id").equalTo("f0")
-      .map(new Value0Of2<>());
+      originalVertices.join(vertices).where(new Id<>()).equalTo(0).with(new LeftSide<>());
 
     DataSet<TemporalEdge> joinedEdges =
-      originalEdges
-      .joinWithTiny(edges)
-      .where("id").equalTo("f0")
-      .map(new Value0Of2<>());
+      originalEdges.join(edges).where(new Id<>()).equalTo(0).with(new LeftSide<>());
 
     return superGraph.getFactory().fromDataSets(joinedVertices, joinedEdges);
-  }
-
-  @Override
-  public String getName() {
-    return Snapshot.class.getName();
   }
 }

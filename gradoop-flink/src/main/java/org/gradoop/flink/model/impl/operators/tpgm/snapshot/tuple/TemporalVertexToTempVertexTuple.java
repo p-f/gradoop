@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014 - 2018 Leipzig University (Database Research Group)
+ * Copyright © 2014 - 2019 Leipzig University (Database Research Group)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,18 +19,20 @@ import org.apache.flink.api.common.functions.MapFunction;
 import org.gradoop.common.model.impl.pojo.temporal.TemporalVertex;
 
 /**
- * TemporalVertex => TempVertexTuple
+ * Creates a simpler tuple-based representation of a temporal vertex.
  */
 public class TemporalVertexToTempVertexTuple
   implements MapFunction<TemporalVertex, TempVertexTuple> {
 
   /**
-   * Serial.
+   * Reduce object instantiations.
    */
-  private static final long serialVersionUID = 42L;
+  private final TempVertexTuple reuseTuple = new TempVertexTuple();
 
   @Override
-  public TempVertexTuple map(TemporalVertex value) throws Exception {
-    return new TempVertexTuple(value.getId(), value.getValidTime());
+  public TempVertexTuple map(TemporalVertex value) {
+    reuseTuple.f0 = value.getId();
+    reuseTuple.f1 = value.getValidTime();
+    return reuseTuple;
   }
 }

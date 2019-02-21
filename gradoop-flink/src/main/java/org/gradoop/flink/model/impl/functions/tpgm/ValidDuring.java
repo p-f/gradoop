@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014 - 2018 Leipzig University (Database Research Group)
+ * Copyright © 2014 - 2019 Leipzig University (Database Research Group)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,28 +15,43 @@
  */
 package org.gradoop.flink.model.impl.functions.tpgm;
 
-import org.gradoop.flink.model.impl.operators.tpgm.snapshot.FourFunction;
-import org.gradoop.flink.model.impl.operators.tpgm.snapshot.RetrievalOperatorBase;
-import org.gradoop.flink.model.impl.operators.tpgm.snapshot.RetrievalOperator;
+import org.gradoop.flink.model.api.tpgm.functions.TemporalPredicate;
 
 /**
- * Implementation of the ValidDuring retrieval operator.
+ * Implementation of the <b>ValidDuring</b> temporal predicate.
+ * Given a certain time-interval, this predicate matches all intervals that contain that interval.
  */
-public class ValidDuring extends RetrievalOperator {
+public class ValidDuring implements TemporalPredicate {
+
   /**
-   * Condition to be checked.
+   * The start of the query time-interval.
    */
-  protected FourFunction<Long, Long, Long, Long, Boolean> condition =
-  (from, to, tFrom, tTo) -> tFrom <= from && tTo >= to;
+  private final long queryFrom;
+
+  /**
+   * The end of the query time-interval.
+   */
+  private final long queryTo;
 
   /**
    * Creates a ValidDuring instance with the given time stamps.
    *
-   * @param from the from value to compare
-   * @param to the to value to compare
+   * @param from The start of the query time-interval.
+   * @param to   The end of the query time-interval.
    */
   public ValidDuring(long from, long to) {
-    this.vertexFilterFunction = new RetrievalOperatorBase<>(condition, from, to);
-    this.edgeFilterFunction = new RetrievalOperatorBase<>(condition, from, to);
+    queryFrom = from;
+    queryTo = to;
+  }
+
+  @Override
+  public boolean test(Long from, Long to) {
+    if (from != null && from > queryFrom) {
+      return false;
+    }
+    if (to != null && to < queryTo) {
+      return false;
+    }
+    return true;
   }
 }

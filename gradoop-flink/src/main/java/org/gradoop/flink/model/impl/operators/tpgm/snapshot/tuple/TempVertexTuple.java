@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014 - 2018 Leipzig University (Database Research Group)
+ * Copyright © 2014 - 2019 Leipzig University (Database Research Group)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,42 +19,38 @@ import org.apache.flink.api.java.tuple.Tuple2;
 import org.gradoop.common.model.impl.id.GradoopId;
 
 /**
- * (vertexId, validTime)
+ * A simple tuple-based representation of a temporal vertex containing only its id and valid time.
  */
 public class TempVertexTuple extends Tuple2<GradoopId, Tuple2<Long, Long>>
   implements TempElementTuple {
 
   /**
-   * serial
-   */
-  private static final long serialVersionUID = 42L;
-
-  /**
-   * default constructor
+   * Constructor for serialization.
    */
   public TempVertexTuple() {
+    super();
   }
 
   /**
-   * constructor with field values
+   * Constructor setting the fields of this tuple.
    *
-   * @param vertexId vertex id
-   * @param validTime valid time interval
+   * @param vertexId  The id of the vertex.
+   * @param validTime The valid time of the vertex.
    */
   public TempVertexTuple(GradoopId vertexId, Tuple2<Long, Long> validTime) {
-    this.f0 = vertexId;
-    this.f1 = validTime;
+    super(vertexId, validTime);
   }
 
   /**
-   * Get the gradoop id of the vertex.
+   * Get the id of the vertex.
    *
-   * @return the gradoop id of the vertex
+   * @return The id of the vertex.
    */
   public GradoopId getVertexId() {
     return f0;
   }
 
+  @Override
   public Tuple2<Long, Long> getValidTime() {
     return f1;
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014 - 2018 Leipzig University (Database Research Group)
+ * Copyright © 2014 - 2019 Leipzig University (Database Research Group)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,28 +15,42 @@
  */
 package org.gradoop.flink.model.impl.functions.tpgm;
 
-import org.gradoop.flink.model.impl.operators.tpgm.snapshot.FourFunction;
-import org.gradoop.flink.model.impl.operators.tpgm.snapshot.RetrievalOperatorBase;
-import org.gradoop.flink.model.impl.operators.tpgm.snapshot.RetrievalOperator;
+import org.gradoop.flink.model.api.tpgm.functions.TemporalPredicate;
 
 /**
- * Implementation of the ContainedIn retrieval operator.
+ * Implementation of the <b>ContainedIn</b> temporal predicate.
+ * Given a certain time interval, this predicate will match all intervals that are a
+ * subset of that interval.
  */
-public class ContainedIn extends RetrievalOperator {
+public class ContainedIn implements TemporalPredicate {
+
   /**
-   * Condition to be checked.
+   * The start of the query time-interval.
    */
-  protected FourFunction<Long, Long, Long, Long, Boolean> condition =
-  (from, to, tFrom, tTo) -> tFrom >= from && tTo <= to;
+  private final long queryFrom;
+
+  /**
+   * The end of the query time-interval.
+   */
+  private final long queryTo;
 
   /**
    * Creates a ContainedIn instance with the given time stamps.
    *
-   * @param from the from value to compare
-   * @param to the to value to compare
+   * @param from The start of the query time-interval.
+   * @param to   The end of the query time-interval.
    */
   public ContainedIn(long from, long to) {
-    this.vertexFilterFunction = new RetrievalOperatorBase<>(condition, from, to);
-    this.edgeFilterFunction = new RetrievalOperatorBase<>(condition, from, to);
+    queryFrom = from;
+    queryTo = to;
+  }
+
+  @Override
+  public boolean test(Long from, Long to) {
+    if (from == null || to == null) {
+      // The interval is not closed and can not be a subset of the query interval.
+      return false;
+    }
+    return queryFrom <= from && to <= queryTo;
   }
 }
