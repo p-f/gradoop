@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014 - 2018 Leipzig University (Database Research Group)
+ * Copyright © 2014 - 2019 Leipzig University (Database Research Group)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,28 +15,46 @@
  */
 package org.gradoop.flink.model.impl.functions.tpgm;
 
-import org.gradoop.flink.model.impl.operators.tpgm.snapshot.FourFunction;
-import org.gradoop.flink.model.impl.operators.tpgm.snapshot.RetrievalOperatorBase;
-import org.gradoop.flink.model.impl.operators.tpgm.snapshot.RetrievalOperator;
+import org.gradoop.flink.model.api.tpgm.functions.TemporalPredicate;
 
 /**
- * Implementation of the Between retrieval operator.
+ * Implementation of the <b>Between</b> temporal predicate.
+ * Given a certain time-interval, this predicate will match all intervals that start
+ * before or at that interval's end and end after the start of that interval.
  */
-public class Between extends RetrievalOperator {
+public class Between implements TemporalPredicate {
+
   /**
-   * Condition to be checked.
+   * The start of the query time-interval.
    */
-  protected FourFunction<Long, Long, Long, Long, Boolean> condition =
-  (from, to, tFrom, tTo) -> tFrom <= to && tTo > from;
+  private final long queryFrom;
+
+  /**
+   * The end of the query time-interval.
+   */
+  private final long queryTo;
 
   /**
    * Creates a Between instance with the given time stamps.
    *
-   * @param from the from value to compare
-   * @param to the to value to compare
+   * @param from The start of the query time-interval.
+   * @param to   The end of the query time-interval.
    */
   public Between(long from, long to) {
-    this.vertexFilterFunction = new RetrievalOperatorBase<>(condition, from, to);
-    this.edgeFilterFunction = new RetrievalOperatorBase<>(condition, from, to);
+    queryFrom = from;
+    queryTo = to;
+  }
+
+  @Override
+  public boolean test(Long from, Long to) {
+    if (from != null && from > queryTo) {
+      // If the interval has a start, make sure it was before the query intervals's end.
+      return false;
+    }
+    if (to != null && to <= queryFrom) {
+      // If the interval has an end, make sure it was after the query intervals' start.
+      return false;
+    }
+    return true;
   }
 }

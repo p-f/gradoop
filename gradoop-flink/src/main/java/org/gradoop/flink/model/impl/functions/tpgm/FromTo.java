@@ -18,11 +18,11 @@ package org.gradoop.flink.model.impl.functions.tpgm;
 import org.gradoop.flink.model.api.tpgm.functions.TemporalPredicate;
 
 /**
- * Implementation of the <b>DeletedIn</b> temporal predicate.
- * Given a certain time-interval, this predicate will match all intervals ending during that
- * interval.
+ * Implementation of the <b>FromTo</b> temporal predicate.
+ * Given a certain time-interval, this predicate will match all intervals that start
+ * before that interval's end and end after the start of that interval.
  */
-public class DeletedIn implements TemporalPredicate {
+public class FromTo implements TemporalPredicate {
 
   /**
    * The start of the query time-interval.
@@ -35,21 +35,26 @@ public class DeletedIn implements TemporalPredicate {
   private final long queryTo;
 
   /**
-   * Creates a DeletedIn instance with the given time stamps.
+   * Creates a FromTo instance with the given time stamps.
    *
    * @param from The start of the query time-interval.
-   * @param to   the end of the query time-interval.
+   * @param to   The end of the query time-interval.
    */
-  public DeletedIn(long from, long to) {
+  public FromTo(long from, long to) {
     queryFrom = from;
     queryTo = to;
   }
 
   @Override
   public boolean test(Long from, Long to) {
-    if (to == null) {
+    if (from != null && from >= queryTo) {
+      // If the interval has a start, make sure it was before the query intervals's end.
       return false;
     }
-    return queryFrom <= to && to <= queryTo;
+    if (to != null && to <= queryFrom) {
+      // If the interval has an end, make sure it was after the query intervals' start.
+      return false;
+    }
+    return true;
   }
 }

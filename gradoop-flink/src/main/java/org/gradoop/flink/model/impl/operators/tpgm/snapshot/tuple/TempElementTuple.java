@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014 - 2018 Leipzig University (Database Research Group)
+ * Copyright © 2014 - 2019 Leipzig University (Database Research Group)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,13 @@ package org.gradoop.flink.model.impl.operators.tpgm.snapshot.tuple;
 import org.apache.flink.api.java.tuple.Tuple2;
 
 /**
- * Defines the functional interface of a tuple representation of temporal graph elements.
+ * Indicates that a tuple has a valid time.
  */
 public interface TempElementTuple {
   /**
    * Get the valid time tuple (valid-from, valid-to).
    *
-   * @return a tuple 2 representing the valid time interval
+   * @return A 2-tuple representing the valid time interval.
    */
   Tuple2<Long, Long> getValidTime();
 }

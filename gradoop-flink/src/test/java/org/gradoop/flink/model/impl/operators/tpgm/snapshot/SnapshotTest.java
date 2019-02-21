@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014 - 2018 Leipzig University (Database Research Group)
+ * Copyright © 2014 - 2019 Leipzig University (Database Research Group)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.gradoop.flink.model.impl.operators.tpgm.snapshot;
 import org.gradoop.flink.model.GradoopFlinkTestBase;
 import org.gradoop.flink.model.impl.epgm.LogicalGraph;
 import org.gradoop.flink.model.impl.functions.tpgm.AsOf;
-import org.gradoop.flink.model.impl.functions.tpgm.From;
+import org.gradoop.flink.model.impl.functions.tpgm.FromTo;
 import org.gradoop.flink.model.impl.operators.tpgm.snapshot.functions.Extractor;
 import org.gradoop.flink.model.impl.tpgm.TemporalGraph;
 import org.gradoop.flink.util.FlinkAsciiGraphLoader;
@@ -61,7 +61,7 @@ public class SnapshotTest extends GradoopFlinkTestBase {
       "]");
     LogicalGraph expected = loader.getLogicalGraphByVariable("expected");
 
-    TemporalGraph output = tg.callForGraph(new Snapshot(new From(1543300000000L, 1544400000000L)));
+    TemporalGraph output = tg.callForGraph(new Snapshot(new FromTo(1543300000000L, 1544400000000L)));
 
     output.print();
 

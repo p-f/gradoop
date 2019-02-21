@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014 - 2018 Leipzig University (Database Research Group)
+ * Copyright © 2014 - 2019 Leipzig University (Database Research Group)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,27 +15,41 @@
  */
 package org.gradoop.flink.model.impl.functions.tpgm;
 
-import org.gradoop.flink.model.impl.operators.tpgm.snapshot.FourFunction;
-import org.gradoop.flink.model.impl.operators.tpgm.snapshot.RetrievalOperatorBase;
-import org.gradoop.flink.model.impl.operators.tpgm.snapshot.RetrievalOperator;
+import org.gradoop.flink.model.api.tpgm.functions.TemporalPredicate;
 
 /**
- * Implementation of the AsOf retrieval operator.
+ * Implementation of the <b>AsOf</b> predicate.
+ * Given a certain time-stamp, this predicate will match all time-stamps before that time
+ * and all time-interval containing that time.
  */
-public class AsOf extends RetrievalOperator {
-  /**
-   * Condition to be checked.
-   */
-  protected FourFunction<Long, Long, Long, Long, Boolean> condition =
-  (from, to, tFrom, tTo) -> tFrom <= from && tTo <= from;
+public class AsOf implements TemporalPredicate {
 
   /**
-   * Creates a AsOf instance with the given time stamp.
+   * The timestamp to be matched.
+   */
+  private final long timeStamp;
+
+  /**
+   * Creates a AsOf instance with the given time-stamp.
    *
-   * @param timestamp the time stamp to compare
+   * @param timestamp The time-stamp to match.
    */
   public AsOf(long timestamp) {
-    this.vertexFilterFunction = new RetrievalOperatorBase<>(condition, timestamp, 0);
-    this.edgeFilterFunction = new RetrievalOperatorBase<>(condition, timestamp, 0);
+    timeStamp = timestamp;
+  }
+
+  @Override
+  public boolean test(Long from, Long to) {
+    if (from == null && to == null) {
+      // The input is always valid.
+      return true;
+    }
+    if (to == null) {
+      return from <= timeStamp;
+    }
+    if (from == null) {
+      return timeStamp <= to;
+    }
+    return from <= timeStamp && timeStamp <= to;
   }
 }
