@@ -21,6 +21,8 @@ import org.gradoop.common.model.impl.id.GradoopId;
 import org.gradoop.common.model.impl.pojo.Element;
 import org.gradoop.common.model.impl.properties.Properties;
 
+import java.util.Objects;
+
 /**
  * Base class for all temporal elements. Contains interval definitions for transaction time and
  * valid time.
@@ -28,9 +30,13 @@ import org.gradoop.common.model.impl.properties.Properties;
 public abstract class TemporalElement extends Element implements EPGMElement {
 
   /**
-   * The default value for unset valid times (validFrom and validTo).
+   * The default value for unset valid times (validFrom).
    */
-  public static final Long DEFAULT_VALID_TIME = 0L;
+  public static final Long DEFAULT_VALID_TIME_FROM = Long.MIN_VALUE;
+  /**
+   * The default value for unset valid times (validTo).
+   */
+  public static final Long DEFAULT_VALID_TIME_TO = Long.MAX_VALUE;
   /**
    * The default value for unset end of transaction time.
    */
@@ -69,7 +75,7 @@ public abstract class TemporalElement extends Element implements EPGMElement {
     // Set transaction time beginning to the current system time
     transactionTime = new Tuple2<>(System.currentTimeMillis(), DEFAULT_TX_TO);
 
-    validTime = new Tuple2<>(DEFAULT_VALID_TIME, DEFAULT_VALID_TIME);
+    validTime = new Tuple2<>(DEFAULT_VALID_TIME_FROM, DEFAULT_VALID_TIME_TO);
     if (validFrom != null) {
       this.setValidFrom(validFrom);
     }
@@ -93,6 +99,9 @@ public abstract class TemporalElement extends Element implements EPGMElement {
    * @param transactionTime a tuple 2 representing the transaction time interval
    */
   public void setTransactionTime(Tuple2<Long, Long> transactionTime) {
+    Objects.requireNonNull(transactionTime);
+    Objects.requireNonNull(transactionTime.f0);
+    Objects.requireNonNull(transactionTime.f1);
     this.transactionTime = transactionTime;
   }
 
@@ -110,6 +119,9 @@ public abstract class TemporalElement extends Element implements EPGMElement {
    * @param validTime a tuple 2 representing the valid time interval
    */
   public void setValidTime(Tuple2<Long, Long> validTime) {
+    Objects.requireNonNull(validTime);
+    Objects.requireNonNull(validTime.f0);
+    Objects.requireNonNull(validTime.f1);
     this.validTime = validTime;
   }
 
@@ -127,7 +139,7 @@ public abstract class TemporalElement extends Element implements EPGMElement {
    *
    * @param validFrom the beginning of the elements validity as unix timestamp in milliseconds
    */
-  public void setValidFrom(Long validFrom) {
+  public void setValidFrom(long validFrom) {
     this.validTime.f0 = validFrom;
   }
 
@@ -145,7 +157,7 @@ public abstract class TemporalElement extends Element implements EPGMElement {
    *
    * @param validTo the end of the elements validity as unix timestamp in milliseconds
    */
-  public void setValidTo(Long validTo) {
+  public void setValidTo(long validTo) {
     this.validTime.f1 = validTo;
   }
 
