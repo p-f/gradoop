@@ -49,7 +49,7 @@ public class TemporalElementTest {
     assertEquals(validFrom, elementMock.getValidFrom());
     assertEquals(validTo, elementMock.getValidTo());
     assertTrue(elementMock.getTxFrom() <= System.currentTimeMillis());
-    assertEquals((Long) Long.MAX_VALUE, elementMock.getTxTo());
+    assertEquals(Long.MAX_VALUE, (long) elementMock.getTxTo());
   }
 
   /**
