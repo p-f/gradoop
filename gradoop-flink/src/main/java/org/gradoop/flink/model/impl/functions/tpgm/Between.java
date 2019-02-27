@@ -46,15 +46,12 @@ public class Between implements TemporalPredicate {
   }
 
   @Override
-  public boolean test(Long from, Long to) {
-    if (from != null && from > queryTo) {
-      // If the interval has a start, make sure it was before the query intervals's end.
-      return false;
-    }
-    if (to != null && to <= queryFrom) {
-      // If the interval has an end, make sure it was after the query intervals' start.
-      return false;
-    }
-    return true;
+  public boolean test(long from, long to) {
+    return from <= queryTo && to > queryFrom;
+  }
+
+  @Override
+  public String toString() {
+    return "BETWEEN " + queryFrom + " AND " + queryTo;
   }
 }

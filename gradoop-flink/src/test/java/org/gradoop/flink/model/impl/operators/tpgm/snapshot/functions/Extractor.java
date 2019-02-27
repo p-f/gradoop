@@ -20,16 +20,15 @@ import org.gradoop.common.model.api.entities.EPGMElement;
 import org.gradoop.flink.model.GradoopFlinkTestBase;
 import org.gradoop.flink.model.api.functions.TimeIntervalExtractor;
 
-public class Extractor<E extends EPGMElement>
-  extends GradoopFlinkTestBase implements TimeIntervalExtractor<E> {
-
-  /**
-   * Serial.
-   */
-  private static final long serialVersionUID = 42L;
+/**
+ * A basic implementation of a {@link TimeIntervalExtractor} used for testing purposes.
+ *
+ * @param <E> The EPGM element type.
+ */
+public class Extractor<E extends EPGMElement> implements TimeIntervalExtractor<E> {
 
   @Override
-  public Tuple2<Long, Long> map(E element) throws Exception {
-    return extractTime(element);
+  public Tuple2<Long, Long> map(E element) {
+    return GradoopFlinkTestBase.extractTime(element);
   }
 }

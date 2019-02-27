@@ -46,10 +46,12 @@ public class CreatedIn implements TemporalPredicate {
   }
 
   @Override
-  public boolean test(Long from, Long to) {
-    if (from == null) {
-      return false;
-    }
+  public boolean test(long from, long to) {
     return queryFrom <= from && from <= queryTo;
+  }
+
+  @Override
+  public String toString() {
+    return String.format("CREATED IN (%d, %d)", queryFrom, queryTo);
   }
 }

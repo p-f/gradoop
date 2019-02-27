@@ -46,10 +46,12 @@ public class DeletedIn implements TemporalPredicate {
   }
 
   @Override
-  public boolean test(Long from, Long to) {
-    if (to == null) {
-      return false;
-    }
+  public boolean test(long from, long to) {
     return queryFrom <= to && to <= queryTo;
+  }
+
+  @Override
+  public String toString() {
+    return String.format("DELETED IN (%d, %d)", queryFrom, queryTo);
   }
 }

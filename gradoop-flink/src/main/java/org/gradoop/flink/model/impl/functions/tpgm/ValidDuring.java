@@ -45,13 +45,12 @@ public class ValidDuring implements TemporalPredicate {
   }
 
   @Override
-  public boolean test(Long from, Long to) {
-    if (from != null && from > queryFrom) {
-      return false;
-    }
-    if (to != null && to < queryTo) {
-      return false;
-    }
-    return true;
+  public boolean test(long from, long to) {
+    return from <= queryFrom && to >= queryTo;
+  }
+
+  @Override
+  public String toString() {
+    return String.format("VALID DURING (%d, %d)", queryFrom, queryTo);
   }
 }

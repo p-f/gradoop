@@ -18,40 +18,17 @@ package org.gradoop.flink.model.impl.functions.tpgm;
 import org.gradoop.flink.model.api.tpgm.functions.TemporalPredicate;
 
 /**
- * Implementation of the <b>ContainedIn</b> temporal predicate.
- * Given a certain time interval, this predicate will match all intervals that are a
- * subset of that interval.
+ * A temporal predicate that matches all time intervals.
  */
-public class ContainedIn implements TemporalPredicate {
-
-  /**
-   * The start of the query time-interval.
-   */
-  private final long queryFrom;
-
-  /**
-   * The end of the query time-interval.
-   */
-  private final long queryTo;
-
-  /**
-   * Creates a ContainedIn instance with the given time stamps.
-   *
-   * @param from The start of the query time-interval.
-   * @param to   The end of the query time-interval.
-   */
-  public ContainedIn(long from, long to) {
-    queryFrom = from;
-    queryTo = to;
-  }
+public class All implements TemporalPredicate {
 
   @Override
   public boolean test(long from, long to) {
-    return queryFrom <= from && to <= queryTo;
+    return true;
   }
 
   @Override
   public String toString() {
-    return String.format("CONTAINED IN (%d, %d)", queryFrom, queryTo);
+    return "ALL";
   }
 }
