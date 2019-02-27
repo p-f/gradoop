@@ -15,14 +15,15 @@
  */
 package org.gradoop.flink.model.api.tpgm.functions;
 
+import java.io.Serializable;
+
 /**
  * A predicate that selects certain time-stamps or time-intervals.
  */
 @FunctionalInterface
-public interface TemporalPredicate {
+public interface TemporalPredicate extends Serializable {
   /**
    * Evaluates this predicate for a certain time-stamp or -interval.
-   * If the second argument is {@code null}, the input is evaluated as a time-stamp.
    * If this predicate only operates on time-stamps, the second argument will be ignored.
    *
    * @param from The start of the time-interval. (Or the time-stamp.)
@@ -30,5 +31,5 @@ public interface TemporalPredicate {
    *             time-stamps.)
    * @return {@code true}, if the time-interval /-stamp matches this predicate.
    */
-  boolean test(Long from, Long to);
+  boolean test(long from, long to);
 }

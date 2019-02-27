@@ -39,17 +39,12 @@ public class AsOf implements TemporalPredicate {
   }
 
   @Override
-  public boolean test(Long from, Long to) {
-    if (from == null && to == null) {
-      // The input is always valid.
-      return true;
-    }
-    if (to == null) {
-      return from <= timeStamp;
-    }
-    if (from == null) {
-      return timeStamp <= to;
-    }
-    return from <= timeStamp && timeStamp <= to;
+  public boolean test(long from, long to) {
+    return from <= timeStamp && to > timeStamp;
+  }
+
+  @Override
+  public String toString() {
+    return "AS OF " + timeStamp;
   }
 }

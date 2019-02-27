@@ -19,8 +19,8 @@ import org.gradoop.flink.model.api.tpgm.functions.TemporalPredicate;
 
 /**
  * Implementation of the <b>FromTo</b> temporal predicate.
- * Given a certain time-interval, this predicate will match all intervals that start
- * before that interval's end and end after the start of that interval.
+ * Given a certain time-interval, this predicate will match all intervals that were valid during
+ * that interval.
  */
 public class FromTo implements TemporalPredicate {
 
@@ -46,15 +46,12 @@ public class FromTo implements TemporalPredicate {
   }
 
   @Override
-  public boolean test(Long from, Long to) {
-    if (from != null && from >= queryTo) {
-      // If the interval has a start, make sure it was before the query intervals's end.
-      return false;
-    }
-    if (to != null && to <= queryFrom) {
-      // If the interval has an end, make sure it was after the query intervals' start.
-      return false;
-    }
-    return true;
+  public boolean test(long from, long to) {
+    return from < queryTo && to > queryFrom;
+  }
+
+  @Override
+  public String toString() {
+    return "FROM " + queryFrom + " TO " + queryTo;
   }
 }
