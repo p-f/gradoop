@@ -23,6 +23,7 @@ import org.gradoop.flink.model.api.epgm.GraphBaseOperators;
 import org.gradoop.flink.model.api.functions.TransformationFunction;
 import org.gradoop.flink.model.api.operators.UnaryBaseGraphToBaseCollectionOperator;
 import org.gradoop.flink.model.api.operators.UnaryBaseGraphToBaseGraphOperator;
+import org.gradoop.flink.model.api.tpgm.functions.TemporalPredicate;
 import org.gradoop.flink.model.impl.epgm.LogicalGraph;
 import org.gradoop.flink.model.impl.operators.matching.common.MatchStrategy;
 import org.gradoop.flink.model.impl.operators.matching.common.statistics.GraphStatistics;
@@ -40,6 +41,26 @@ public interface TemporalGraphOperators extends GraphBaseOperators {
   //----------------------------------------------------------------------------
   // Unary Operators
   //----------------------------------------------------------------------------
+
+  /**
+   * Compares two snapshots of this graph. Given two temporal predicates, this operation
+   * will check if a graph element (a vertex or an edge) was added, removed or kept in the snapshot
+   * based on the second predicate.
+   *
+   * A property with key {@code _diff} will be set on each graph element, its value will be set to
+   * <ul>
+   *   <li>{@code 0}, if the element is either present in both snapshots or neither snapshot.</li>
+   *   <li>{@code 1}, if the element is present in the second, but not the first snapshot
+   *   (i.e. it was added since the first snapshot).</li>
+   *   <li>{@code -1}, if the element is present in the first, but not the second snapshot
+   *   (i.e. it was removed since the first snapshot).</li>
+   * </ul>
+   *
+   * @param firstSnapShot  The predicate used to determine the first snapshot.
+   * @param secondSnapshot The predicate used to determine the second snapshot.
+   * @return This graph with a {@code _diff} property set on all elements.
+   */
+  TemporalGraph diff(TemporalPredicate firstSnapShot, TemporalPredicate secondSnapshot);
 
   /**
    * Evaluates the given query using the Cypher query engine. The engine uses default morphism
