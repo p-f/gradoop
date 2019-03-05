@@ -53,18 +53,6 @@ public class Snapshot implements UnaryBaseGraphToBaseGraphOperator<TemporalGraph
 
   @Override
   public TemporalGraph execute(TemporalGraph superGraph) {
-    return subgraphAndVerify(superGraph);
-  }
-
-  /**
-   * Returns the subgraph of the given temporal graph that is induced by the temporal predicate.
-   * <p>
-   * Note, that the operator does verify the consistency of the resulting graph.
-   *
-   * @param superGraph The input graph.
-   * @return subgraph The resulting graph.
-   */
-  private TemporalGraph subgraphAndVerify(TemporalGraph superGraph) {
     DataSet<TempVertexTuple> vertices = superGraph.getVertices()
       .map(new TemporalVertexToTempVertexTuple())
       .filter(new ByTemporalPredicate<>(temporalPredicate));
@@ -75,29 +63,16 @@ public class Snapshot implements UnaryBaseGraphToBaseGraphOperator<TemporalGraph
       .join(vertices).where(1).equalTo(0).with(new LeftSide<>())
       .join(vertices).where(2).equalTo(0).with(new LeftSide<>());
 
-    return buildGraph(superGraph, vertices, verifiedEdges);
-  }
-
-  /**
-   * Joins the given TempVertexTuple and TempEdgeTuple DataSets with the vertex and egde DataSets
-   * of the original graph and returns a TemporalGraph object.
-   *
-   * @param superGraph The original graph.
-   * @param vertices   The filtered vertices.
-   * @param edges      The filtered and verified edges.
-   * @return subgraph  A graph from the original graph containing only the filtered elements.
-   */
-  private TemporalGraph buildGraph(TemporalGraph superGraph, DataSet<TempVertexTuple> vertices,
-    DataSet<TempEdgeTuple> edges) {
     DataSet<TemporalVertex> originalVertices = superGraph.getVertices();
     DataSet<TemporalEdge> originalEdges = superGraph.getEdges();
 
-    DataSet<TemporalVertex> joinedVertices =
+    DataSet<TemporalVertex> resultVertices =
       originalVertices.join(vertices).where(new Id<>()).equalTo(0).with(new LeftSide<>());
 
-    DataSet<TemporalEdge> joinedEdges =
-      originalEdges.join(edges).where(new Id<>()).equalTo(0).with(new LeftSide<>());
+    DataSet<TemporalEdge> resultEdges =
+      originalEdges.join(verifiedEdges).where(new Id<>()).equalTo(0).with(new LeftSide<>());
 
-    return superGraph.getFactory().fromDataSets(joinedVertices, joinedEdges);
+    return superGraph.getFactory().fromDataSets(resultVertices, resultEdges);
   }
+
 }
