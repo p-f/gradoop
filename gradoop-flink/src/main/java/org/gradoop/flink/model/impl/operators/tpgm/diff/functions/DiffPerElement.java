@@ -58,7 +58,7 @@ public class DiffPerElement<E extends TemporalElement> implements MapFunction<E,
   }
 
   @Override
-  public E map(E value) throws Exception {
+  public E map(E value) {
     Tuple2<Long, Long> validTime = value.getValidTime();
     boolean inFirst = first.test(validTime.f0, validTime.f1);
     boolean inSecond = second.test(validTime.f0, validTime.f1);
