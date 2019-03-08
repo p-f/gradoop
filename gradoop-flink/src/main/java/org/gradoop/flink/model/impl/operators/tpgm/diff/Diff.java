@@ -24,6 +24,8 @@ import org.gradoop.flink.model.api.tpgm.functions.TemporalPredicate;
 import org.gradoop.flink.model.impl.operators.tpgm.diff.functions.DiffPerElement;
 import org.gradoop.flink.model.impl.tpgm.TemporalGraph;
 
+import java.util.Objects;
+
 /**
  * Calculates the difference between two snapshots of a graph and stores the result in a property.
  * The result will be a number indicating that an element is either equal in both snapshots or
@@ -68,8 +70,8 @@ public class Diff implements UnaryBaseGraphToBaseGraphOperator<TemporalGraph> {
    * @param secondPredicate The predicate used for the second snapshot.
    */
   public Diff(TemporalPredicate firstPredicate, TemporalPredicate secondPredicate) {
-    this.first = firstPredicate;
-    this.second = secondPredicate;
+    this.first = Objects.requireNonNull(firstPredicate);
+    this.second = Objects.requireNonNull(secondPredicate);
   }
 
   @Override
