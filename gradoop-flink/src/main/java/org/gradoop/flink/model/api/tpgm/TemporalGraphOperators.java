@@ -48,7 +48,8 @@ public interface TemporalGraphOperators extends GraphBaseOperators {
    * based on the second predicate.
    *
    * This operation returns the union of both snapshots of this, with the following changes:
-   * A property with key {@code _diff} will be set on each graph element, its value will be set to
+   * A property with key {@value org.gradoop.flink.model.impl.operators.tpgm.diff.Diff#PROPERTY_KEY}
+   * will be set on each graph element, its value will be set to
    * <ul>
    *   <li>{@code 0}, if the element is present in both snapshots.</li>
    *   <li>{@code 1}, if the element is present in the second, but not the first snapshot
