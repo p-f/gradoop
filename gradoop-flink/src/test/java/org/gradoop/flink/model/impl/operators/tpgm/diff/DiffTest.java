@@ -40,18 +40,49 @@ public class DiffTest extends GradoopFlinkTestBase {
       "__valFrom: 1543700000000L, _diff: 1})" +
       "(carole:Person {name : \"Carol\", gender : \"f\", city : \"Dresden\", age : 30," +
       "__valFrom: 1543600000000L, _diff: 0})" +
-      "(gpse)-[:hasModerator {since : 2013 , __valFrom : 1543700000000L, __valTo : " +
-      "1543800000000L, _diff: 0}]->(davee)" +
       "(gpse)-[:hasMember{ __valFrom: 1543600000000L, __valTo: 1543800000000L, _diff: -1}]->" +
       "(davee) (gpse)-[:hasMember {_diff: 0}]->(carole)" +
       "-[:knows {since : 2014 , __valFrom : 1543700000000L, _diff: 1}]->(davee)" +
       "]");
     LogicalGraph inputGraphEpgm = loader.getLogicalGraphByVariable("g3");
-    TemporalGraph temporalGraph = inputGraphEpgm.toTemporalGraph(
-      GradoopFlinkTestBase::extractGraphHeadTime, GradoopFlinkTestBase::extractVertexTime,
-      GradoopFlinkTestBase::extractEdgeTime);
+    TemporalGraph temporalGraph = toTemporalGraph(inputGraphEpgm);
     TemporalGraph result = temporalGraph.diff(new AsOf(1543600000000L), new AsOf(1543800000000L));
     collectAndAssertTrue(loader.getLogicalGraphByVariable("expected").equalsByData(
       result.toLogicalGraph()));
+  }
+
+  /**
+   * Test the temporal diff operator with validation.
+   *
+   * @throws Exception when the execution in Flink fails.
+   */
+  @Test
+  public void testDiffOnGraphWithValidate() throws Exception {
+    FlinkAsciiGraphLoader loader = getLoaderFromString("testGraph[" +
+      "(a:A {__valFrom: 0L, __valTo: 3L})-[:e]->(b:B {__valFrom: 2L, __valTo: 5L})" +
+      "] expected1 [" +
+      "(a1:A {__valFrom: 0L, __valTo: 3L, _diff: 0})" +
+      "] expected2 [" +
+      "(b2:B {__valFrom: 2L, __valTo: 5L, _diff: 0})" +
+      "]");
+    TemporalGraph result1 = toTemporalGraph(loader.getLogicalGraphByVariable("testGraph"))
+      .diff(new AsOf(0L), new AsOf(1L), true);
+    collectAndAssertTrue(loader.getLogicalGraphByVariable("expected1")
+      .equalsByData(result1.toLogicalGraph()));
+    TemporalGraph result2 = toTemporalGraph(loader.getLogicalGraphByVariable("testGraph"))
+      .diff(new AsOf(3L), new AsOf(4L), true);
+    collectAndAssertTrue(loader.getLogicalGraphByVariable("expected2")
+      .equalsByData(result2.toLogicalGraph()));
+  }
+
+  /**
+   * Transform a logical graph to a temporal graph.
+   *
+   * @param graph The logical graph.
+   * @return The temporal graph.
+   */
+  private TemporalGraph toTemporalGraph(LogicalGraph graph) {
+    return graph.toTemporalGraph(GradoopFlinkTestBase::extractGraphHeadTime,
+      GradoopFlinkTestBase::extractVertexTime, GradoopFlinkTestBase::extractEdgeTime);
   }
 }

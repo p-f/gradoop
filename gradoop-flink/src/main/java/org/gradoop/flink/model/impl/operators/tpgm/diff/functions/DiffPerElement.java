@@ -15,9 +15,10 @@
  */
 package org.gradoop.flink.model.impl.operators.tpgm.diff.functions;
 
-import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.java.functions.FunctionAnnotation;
 import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.util.Collector;
 import org.gradoop.common.model.impl.pojo.temporal.TemporalElement;
 import org.gradoop.common.model.impl.properties.PropertyValue;
 import org.gradoop.flink.model.api.tpgm.functions.TemporalPredicate;
@@ -28,12 +29,13 @@ import java.util.Objects;
 /**
  * Evaluates two temporal predicates per element of a data set and sets the
  * {@value Diff#PROPERTY_KEY} accordingly.
+ * Values not matching any of the two predicates will be discarded.
  *
  * @param <E> The element type.
  */
 @FunctionAnnotation.ReadFields("validTime")
 @FunctionAnnotation.NonForwardedFields("properties")
-public class DiffPerElement<E extends TemporalElement> implements MapFunction<E, E> {
+public class DiffPerElement<E extends TemporalElement> implements FlatMapFunction<E, E> {
 
   /**
    * The predicate used to determine the first snapshot.
@@ -58,7 +60,7 @@ public class DiffPerElement<E extends TemporalElement> implements MapFunction<E,
   }
 
   @Override
-  public E map(E value) {
+  public void flatMap(E value, Collector<E> out) {
     Tuple2<Long, Long> validTime = value.getValidTime();
     boolean inFirst = first.test(validTime.f0, validTime.f1);
     boolean inSecond = second.test(validTime.f0, validTime.f1);
@@ -70,9 +72,9 @@ public class DiffPerElement<E extends TemporalElement> implements MapFunction<E,
     } else if (inSecond) {
       result = Diff.VALUE_ADDED;
     } else {
-      result = Diff.VALUE_EQUAL;
+      return;
     }
     value.setProperty(Diff.PROPERTY_KEY, result);
-    return value;
+    out.collect(value);
   }
 }

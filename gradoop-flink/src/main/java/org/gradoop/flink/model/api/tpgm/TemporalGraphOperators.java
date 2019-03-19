@@ -47,20 +47,43 @@ public interface TemporalGraphOperators extends GraphBaseOperators {
    * will check if a graph element (a vertex or an edge) was added, removed or kept in the snapshot
    * based on the second predicate.
    *
+   * This operation returns the union of both snapshots of this, with the following changes:
    * A property with key {@code _diff} will be set on each graph element, its value will be set to
    * <ul>
-   *   <li>{@code 0}, if the element is either present in both snapshots or neither snapshot.</li>
+   *   <li>{@code 0}, if the element is present in both snapshots.</li>
    *   <li>{@code 1}, if the element is present in the second, but not the first snapshot
    *   (i.e. it was added since the first snapshot).</li>
    *   <li>{@code -1}, if the element is present in the first, but not the second snapshot
    *   (i.e. it was removed since the first snapshot).</li>
    * </ul>
+   * Graph elements present in neither snapshot will be discarded.
+   * Dangling edges will be removed in an optional validation step.
    *
-   * @param firstSnapShot  The predicate used to determine the first snapshot.
+   * @param firstSnapshot  The predicate used to determine the first snapshot.
    * @param secondSnapshot The predicate used to determine the second snapshot.
-   * @return This graph with a {@code _diff} property set on all elements.
+   * @param validate       Should the graph (i.e. its edge set) be validated?
+   * @return This graph with a
+   * {@value org.gradoop.flink.model.impl.operators.tpgm.diff.Diff#PROPERTY_KEY} property set on all
+   * elements present in one or both snapshots of this graph.
    */
-  TemporalGraph diff(TemporalPredicate firstSnapShot, TemporalPredicate secondSnapshot);
+  TemporalGraph diff(TemporalPredicate firstSnapshot, TemporalPredicate secondSnapshot,
+    boolean validate);
+
+  /**
+   * Compares two snapshots of this graph with validation disabled.
+   * This is equivalent to {@link #diff(TemporalPredicate, TemporalPredicate, boolean)
+   * diff(firstSnapshot, secondSnapshot, false)}.
+   *
+   * @param firstSnapshot  The predicate used to determine the first snapshot.
+   * @param secondSnapshot The predicate used to determine the second snapshot.
+   * @return This graph with a
+   * {@value org.gradoop.flink.model.impl.operators.tpgm.diff.Diff#PROPERTY_KEY} property set on
+   * all elements present in one or both snapshots of this graph.
+   * @see #diff(TemporalPredicate, TemporalPredicate, boolean) Description of this operator.
+   */
+  default TemporalGraph diff(TemporalPredicate firstSnapshot, TemporalPredicate secondSnapshot) {
+    return diff(firstSnapshot, secondSnapshot, false);
+  }
 
   /**
    * Evaluates the given query using the Cypher query engine. The engine uses default morphism
