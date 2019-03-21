@@ -15,12 +15,20 @@
  */
 package org.gradoop.flink.model.impl.operators.tpgm.diff;
 
+import org.apache.flink.api.java.io.LocalCollectionOutputFormat;
+import org.gradoop.common.model.impl.pojo.temporal.TemporalEdge;
+import org.gradoop.common.model.impl.pojo.temporal.TemporalVertex;
 import org.gradoop.flink.model.GradoopFlinkTestBase;
 import org.gradoop.flink.model.impl.epgm.LogicalGraph;
 import org.gradoop.flink.model.impl.functions.tpgm.AsOf;
 import org.gradoop.flink.model.impl.tpgm.TemporalGraph;
 import org.gradoop.flink.util.FlinkAsciiGraphLoader;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test for the temporal diff operator.
@@ -65,14 +73,52 @@ public class DiffTest extends GradoopFlinkTestBase {
       "] expected2 [" +
       "(b2:B {__valFrom: 2L, __valTo: 5L, _diff: 0})" +
       "]");
+    // We need to verify the actual vertex/edge sets, as equals ignores dangling edges.
+    // The dangling edge with label e should be removed with a validate step.
     TemporalGraph result1 = toTemporalGraph(loader.getLogicalGraphByVariable("testGraph"))
       .diff(new AsOf(0L), new AsOf(1L), true);
-    collectAndAssertTrue(loader.getLogicalGraphByVariable("expected1")
-      .equalsByData(result1.toLogicalGraph()));
+    List<TemporalVertex> vertices = new ArrayList<>();
+    List<TemporalEdge> edges = new ArrayList<>();
+    result1.getVertices().output(new LocalCollectionOutputFormat<>(vertices));
+    result1.getEdges().output(new LocalCollectionOutputFormat<>(edges));
+    getExecutionEnvironment().execute();
+    assertEquals(1, vertices.size());
+    assertEquals(0, edges.size());
+    assertEquals("A", vertices.get(0).getLabel());
+    // Without validate the dangling edge should not be removed, as it matches the temporal
+    // predicate.
+    vertices.clear();
+    edges.clear();
+    result1 = toTemporalGraph(loader.getLogicalGraphByVariable("testGraph"))
+      .diff(new AsOf(0L), new AsOf(1L), false);
+    result1.getVertices().output(new LocalCollectionOutputFormat<>(vertices));
+    result1.getEdges().output(new LocalCollectionOutputFormat<>(edges));
+    getExecutionEnvironment().execute();
+    assertEquals(1, vertices.size());
+    assertEquals(1, edges.size());
+    assertEquals("A", vertices.get(0).getLabel());
+    // Run the same tests, except with to opposite edge direction.
     TemporalGraph result2 = toTemporalGraph(loader.getLogicalGraphByVariable("testGraph"))
       .diff(new AsOf(3L), new AsOf(4L), true);
-    collectAndAssertTrue(loader.getLogicalGraphByVariable("expected2")
-      .equalsByData(result2.toLogicalGraph()));
+    vertices.clear();
+    edges.clear();
+    result2.getVertices().output(new LocalCollectionOutputFormat<>(vertices));
+    result2.getEdges().output(new LocalCollectionOutputFormat<>(edges));
+    getExecutionEnvironment().execute();
+    assertEquals(1, vertices.size());
+    assertEquals(0, edges.size());
+    assertEquals("B", vertices.get(0).getLabel());
+    // Again, without validate.
+    result2 = toTemporalGraph(loader.getLogicalGraphByVariable("testGraph"))
+      .diff(new AsOf(3L), new AsOf(4L), false);
+    vertices.clear();
+    edges.clear();
+    result2.getVertices().output(new LocalCollectionOutputFormat<>(vertices));
+    result2.getEdges().output(new LocalCollectionOutputFormat<>(edges));
+    getExecutionEnvironment().execute();
+    assertEquals(1, vertices.size());
+    assertEquals(1, edges.size());
+    assertEquals("B", vertices.get(0).getLabel());
   }
 
   /**

@@ -16,8 +16,8 @@
 package org.gradoop.flink.model.impl.operators.tpgm.diff.functions;
 
 import org.apache.flink.api.common.functions.FlatMapFunction;
+import org.apache.flink.api.common.functions.util.ListCollector;
 import org.apache.flink.api.java.tuple.Tuple2;
-import org.apache.flink.util.Collector;
 import org.gradoop.common.model.api.entities.EPGMEdgeFactory;
 import org.gradoop.common.model.api.entities.EPGMVertexFactory;
 import org.gradoop.common.model.impl.id.GradoopId;
@@ -34,40 +34,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
 
 /**
  * Test for the {@link DiffPerElement} map function.
  */
 public class DiffPerElementTest extends GradoopFlinkTestBase {
-  /**
-   * A helper class used for testing flat map operations.
-   * This collector will add all resulting elements to a list.
-   *
-   * @param <E> The type of elements to collect.
-   */
-  private static class TestCollector<E> implements Collector<E> {
-    /**
-     * A list used to store result elements of the flat map operation.
-     */
-    private final List<E> results = new ArrayList<>();
-
-    @Override
-    public void collect(E record) {
-      results.add(record);
-    }
-
-    @Override
-    public void close() {
-    }
-
-    /**
-     * Get the list storing result elements of the flat map operation.
-     */
-    public List<E> getResults() {
-      return results;
-    }
-  }
 
   /**
    * A temporal predicate accepting all ranges.
@@ -144,9 +118,9 @@ public class DiffPerElementTest extends GradoopFlinkTestBase {
    * @throws Exception when the flat map operation throws an exception.
    */
   private <E> List<E> runFlatMapFunction(FlatMapFunction<E, E> function, E input) throws Exception {
-    TestCollector<E> resultCollector = new TestCollector<>();
-    function.flatMap(input, resultCollector);
-    return resultCollector.getResults();
+    List<E> results = new ArrayList<>();
+    function.flatMap(input, new ListCollector<>(results));
+    return results;
   }
 
   /**
