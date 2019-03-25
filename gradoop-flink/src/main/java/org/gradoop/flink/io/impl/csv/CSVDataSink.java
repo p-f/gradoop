@@ -20,15 +20,23 @@ import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.core.fs.FileSystem;
 import org.gradoop.flink.io.api.DataSink;
 import org.gradoop.flink.io.impl.csv.functions.EdgeToCSVEdge;
+import org.gradoop.flink.io.impl.csv.functions.TemporalEdgeToTemporalCSVEdge;
 import org.gradoop.flink.io.impl.csv.functions.GraphHeadToCSVGraphHead;
+import org.gradoop.flink.io.impl.csv.functions.TemporalGraphHeadToTemporalCSVGraphHead;
 import org.gradoop.flink.io.impl.csv.functions.VertexToCSVVertex;
+import org.gradoop.flink.io.impl.csv.functions.TemporalVertexToTemporalCSVVertex;
 import org.gradoop.flink.io.impl.csv.metadata.CSVMetaDataSink;
 import org.gradoop.flink.io.impl.csv.metadata.CSVMetaDataSource;
 import org.gradoop.flink.io.impl.csv.tuples.CSVEdge;
 import org.gradoop.flink.io.impl.csv.tuples.CSVGraphHead;
+import org.gradoop.flink.io.impl.csv.tuples.TemporalCSVEdge;
 import org.gradoop.flink.io.impl.csv.tuples.CSVVertex;
+import org.gradoop.flink.io.impl.csv.tuples.TemporalCSVGraphHead;
+import org.gradoop.flink.io.impl.csv.tuples.TemporalCSVVertex;
 import org.gradoop.flink.model.impl.epgm.GraphCollection;
 import org.gradoop.flink.model.impl.epgm.LogicalGraph;
+import org.gradoop.flink.model.impl.tpgm.TemporalGraph;
+import org.gradoop.flink.model.impl.tpgm.TemporalGraphCollection;
 import org.gradoop.flink.util.GradoopFlinkConfig;
 
 import java.io.IOException;
@@ -103,6 +111,52 @@ public class CSVDataSink extends CSVBase implements DataSink {
 
     DataSet<CSVEdge> csvEdges = graphCollection.getEdges()
       .map(new EdgeToCSVEdge())
+      .withBroadcastSet(metaData, BC_METADATA);
+
+    // Write metadata only if the path is not the same or reuseMetadata is false.
+    if (!getMetaDataPath().equals(metaDataPath) || !reuseMetadata()) {
+      new CSVMetaDataSink().writeDistributed(getMetaDataPath(), metaData, writeMode);
+    }
+
+    csvGraphHeads.writeAsCsv(getGraphHeadCSVPath(), CSVConstants.ROW_DELIMITER,
+      CSVConstants.TOKEN_DELIMITER, writeMode);
+
+    csvVertices.writeAsCsv(getVertexCSVPath(), CSVConstants.ROW_DELIMITER,
+      CSVConstants.TOKEN_DELIMITER, writeMode);
+
+    csvEdges.writeAsCsv(getEdgeCSVPath(), CSVConstants.ROW_DELIMITER,
+      CSVConstants.TOKEN_DELIMITER, writeMode);
+  }
+
+  @Override
+  public void write(TemporalGraph temporalGraph, boolean overwrite) throws IOException {
+    write(temporalGraph.getCollectionFactory().fromGraph(temporalGraph), overwrite);
+  }
+
+  @Override
+  public void write(TemporalGraphCollection temporalGraphCollection, boolean overwrite)
+    throws IOException {
+    FileSystem.WriteMode writeMode = overwrite ?
+      FileSystem.WriteMode.OVERWRITE : FileSystem.WriteMode.NO_OVERWRITE;
+    DataSet<Tuple3<String, String, String>> metaData;
+    CSVMetaDataSource source = new CSVMetaDataSource();
+
+    if (!reuseMetadata()) {
+      metaData = source.tuplesFromCollection(temporalGraphCollection);
+    } else {
+      metaData = source.readDistributed(metaDataPath, getConfig());
+    }
+
+    DataSet<TemporalCSVGraphHead> csvGraphHeads = temporalGraphCollection.getGraphHeads()
+      .map(new TemporalGraphHeadToTemporalCSVGraphHead())
+      .withBroadcastSet(metaData, BC_METADATA);
+
+    DataSet<TemporalCSVVertex> csvVertices = temporalGraphCollection.getVertices()
+      .map(new TemporalVertexToTemporalCSVVertex())
+      .withBroadcastSet(metaData, BC_METADATA);
+
+    DataSet<TemporalCSVEdge> csvEdges = temporalGraphCollection.getEdges()
+      .map(new TemporalEdgeToTemporalCSVEdge())
       .withBroadcastSet(metaData, BC_METADATA);
 
     // Write metadata only if the path is not the same or reuseMetadata is false.

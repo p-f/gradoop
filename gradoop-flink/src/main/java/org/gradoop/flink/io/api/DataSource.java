@@ -17,6 +17,8 @@ package org.gradoop.flink.io.api;
 
 import org.gradoop.flink.model.impl.epgm.GraphCollection;
 import org.gradoop.flink.model.impl.epgm.LogicalGraph;
+import org.gradoop.flink.model.impl.tpgm.TemporalGraph;
+import org.gradoop.flink.model.impl.tpgm.TemporalGraphCollection;
 
 import java.io.IOException;
 
@@ -29,6 +31,7 @@ public interface DataSource {
    * Reads the input as logical graph.
    *
    * @return logial graph
+   * @throws IOException if the reading of the graph data fails
    */
   LogicalGraph getLogicalGraph() throws IOException;
 
@@ -36,6 +39,36 @@ public interface DataSource {
    * Reads the input as graph collection.
    *
    * @return graph collection
+   * @throws IOException if the reading of the graph data fails
    */
   GraphCollection getGraphCollection() throws IOException;
+
+  /**
+   * Reads the input as temporal graph.
+   *
+   * By default, an {@link UnsupportedOperationException} is thrown, if the implementing source
+   * doesn't overwrite this method.
+   *
+   * @return temporal graph
+   * @throws IOException if the reading of the graph data fails
+   */
+  default TemporalGraph getTemporalGraph() throws IOException {
+    throw new UnsupportedOperationException(
+      "Reading a temporal graph with this source is not supported yet.");
+  }
+
+  /**
+   * Reads the input as temporal graph collection.
+   *
+   * By default, an {@link UnsupportedOperationException} is thrown, if the implementing source
+   * doesn't overwrite this method.
+   *
+   * @return temporal graph collection
+   * @throws IOException if the reading of the graph data fails
+   */
+  default TemporalGraphCollection getTemporalGraphCollection() throws IOException {
+    throw new UnsupportedOperationException(
+      "Reading a temporal graph collection with this source is not supported yet."
+    );
+  }
 }

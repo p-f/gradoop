@@ -17,10 +17,11 @@ package org.gradoop.flink.io.impl.csv.functions;
 
 import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.api.java.tuple.Tuple;
+import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
+import org.gradoop.common.model.api.entities.EPGMElement;
 import org.gradoop.common.model.impl.metadata.MetaData;
 import org.gradoop.common.model.impl.metadata.PropertyMetaData;
-import org.gradoop.common.model.impl.pojo.Element;
 import org.gradoop.common.model.impl.properties.PropertyValue;
 import org.gradoop.flink.io.impl.csv.CSVConstants;
 import org.gradoop.flink.io.impl.csv.CSVDataSource;
@@ -36,14 +37,14 @@ import java.util.stream.Collectors;
  * @param <E> EPGM element type
  * @param <T> output tuple type
  */
-public abstract class ElementToCSV<E extends Element, T extends Tuple>
+public abstract class ElementToCSV<E extends EPGMElement, T extends Tuple>
   extends RichMapFunction<E, T> {
   /**
    * Constant for an empty string.
    */
   private static final String EMPTY_STRING = "";
   /**
-   * Meta data that provides parsers for a specific {@link Element}.
+   * Meta data that provides parsers for a specific {@link EPGMElement}.
    */
   private CSVMetaData metaData;
 
@@ -113,6 +114,23 @@ public abstract class ElementToCSV<E extends Element, T extends Tuple>
     return collection.stream()
       .map(o -> o instanceof PropertyValue ? escape((PropertyValue) o) : o.toString())
       .collect(Collectors.joining(CSVConstants.LIST_DELIMITER, "[", "]"));
+  }
+
+  /**
+   * Returns a CSV string representation of the temporal attributes in format:
+   *
+   * {@code (tx-from,tx-to),(val-from,val-to)}
+   *
+   * @param transactionTime the transaction time
+   * @param validTime the valid time
+   * @return CSV string representation
+   */
+  String getTemporalDataString(Tuple2<Long, Long> transactionTime, Tuple2<Long, Long> validTime) {
+    return String.format("(%d,%d),(%d,%d)",
+      transactionTime.f0,
+      transactionTime.f1,
+      validTime.f0,
+      validTime.f1);
   }
 
   /**

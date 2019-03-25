@@ -35,6 +35,8 @@ import org.gradoop.flink.model.impl.functions.epgm.VertexFromTemporal;
 import org.gradoop.flink.model.impl.layouts.transactional.tuples.GraphTransaction;
 import org.gradoop.flink.util.GradoopFlinkConfig;
 
+import java.io.IOException;
+
 /**
  * A temporal graph collection is a base concept of the Temporal Property Graph Model (TPGM)
  * that extends the Extended Property Graph Model (EPGM). The temporal graph collection
@@ -101,15 +103,13 @@ public class TemporalGraphCollection implements
   }
 
   @Override
-  public void writeTo(DataSink dataSink) {
-    throw new UnsupportedOperationException(
-      "Writing a temporal graph to a DataSink is not implemented yet.");
+  public void writeTo(DataSink dataSink) throws IOException {
+    dataSink.write(this);
   }
 
   @Override
-  public void writeTo(DataSink dataSink, boolean overWrite) {
-    throw new UnsupportedOperationException(
-      "Writing a temporal graph to a DataSink is not implemented yet.");
+  public void writeTo(DataSink dataSink, boolean overWrite) throws IOException {
+    dataSink.write(this, overWrite);
   }
 
   @Override

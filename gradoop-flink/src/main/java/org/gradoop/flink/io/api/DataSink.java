@@ -17,6 +17,8 @@ package org.gradoop.flink.io.api;
 
 import org.gradoop.flink.model.impl.epgm.GraphCollection;
 import org.gradoop.flink.model.impl.epgm.LogicalGraph;
+import org.gradoop.flink.model.impl.tpgm.TemporalGraph;
+import org.gradoop.flink.model.impl.tpgm.TemporalGraphCollection;
 
 import java.io.IOException;
 
@@ -29,6 +31,7 @@ public interface DataSink {
    * Writes a logical graph to the data sink.
    *
    * @param logicalGraph logical graph
+   * @throws IOException if the writing of the graph data fails
    */
   void write(LogicalGraph logicalGraph) throws IOException;
 
@@ -36,6 +39,7 @@ public interface DataSink {
    * Writes a graph collection graph to the data sink.
    *
    * @param graphCollection graph collection
+   * @throws IOException if the writing of the graph data fails
    */
   void write(GraphCollection graphCollection) throws IOException;
 
@@ -44,6 +48,7 @@ public interface DataSink {
    *
    * @param logicalGraph logical graph
    * @param overwrite true, if existing files should be overwritten
+   * @throws IOException if the writing of the graph data fails
    */
   void write(LogicalGraph logicalGraph, boolean overwrite) throws IOException;
 
@@ -52,6 +57,58 @@ public interface DataSink {
    *
    * @param graphCollection graph collection
    * @param overwrite true, if existing files should be overwritten
+   * @throws IOException if the writing of the graph data fails
    */
   void write(GraphCollection graphCollection, boolean overwrite) throws IOException;
+
+  /**
+   * Writes a temporal graph to the data sink.
+   *
+   * @param temporalGraph temporal graph
+   * @throws IOException if the writing of the graph data fails
+   */
+  default void write(TemporalGraph temporalGraph) throws IOException {
+    write(temporalGraph, false);
+  }
+
+  /**
+   * Writes a temporal graph collection to the data sink.
+   *
+   * @param temporalGraphCollection temporal graph collection
+   * @throws IOException if the writing of the graph data fails
+   */
+  default void write(TemporalGraphCollection temporalGraphCollection) throws IOException {
+    write(temporalGraphCollection, false);
+  }
+
+  /**
+   * Writes a temporal graph to the data sink.
+   *
+   * By default, an {@link UnsupportedOperationException} is thrown, if the implementing sink
+   * doesn't overwrite this method.
+   *
+   * @param temporalGraph temporal graph
+   * @param overwrite true, if existing files should be overwritten
+   * @throws IOException if the writing of the graph data fails
+   */
+  default void write(TemporalGraph temporalGraph, boolean overwrite) throws IOException {
+    throw new UnsupportedOperationException(
+      "Writing a temporal graph with this sink is not supported yet.");
+  }
+
+  /**
+   * Writes a temporal graph collection to the data sink.
+   *
+   * By default, an {@link UnsupportedOperationException} is thrown, if the implementing sink
+   * doesn't overwrite this method.
+   *
+   * @param temporalGraphCollection temporal graph collection
+   * @param overwrite true, if existing files should be overwritten
+   * @throws IOException if the writing of the graph data fails
+   */
+  default void write(TemporalGraphCollection temporalGraphCollection, boolean overwrite)
+    throws IOException {
+    throw new UnsupportedOperationException(
+      "Writing a temporal graph collection with this sink is not supported yet.");
+  }
 }

@@ -18,10 +18,10 @@ package org.gradoop.flink.io.api.metadata.functions;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.functions.FunctionAnnotation;
 import org.apache.flink.api.java.tuple.Tuple3;
-import org.gradoop.common.model.impl.pojo.Edge;
-import org.gradoop.common.model.impl.pojo.Element;
-import org.gradoop.common.model.impl.pojo.GraphHead;
-import org.gradoop.common.model.impl.pojo.Vertex;
+import org.gradoop.common.model.api.entities.EPGMEdge;
+import org.gradoop.common.model.api.entities.EPGMElement;
+import org.gradoop.common.model.api.entities.EPGMGraphHead;
+import org.gradoop.common.model.api.entities.EPGMVertex;
 import org.gradoop.common.model.impl.properties.Property;
 import org.gradoop.flink.io.api.metadata.MetaDataSource;
 import org.gradoop.flink.io.impl.csv.CSVConstants;
@@ -37,7 +37,7 @@ import java.util.Set;
  * @param <E> EPGM element type
  */
 @FunctionAnnotation.ForwardedFields("label->f1")
-public class ElementToPropertyMetaData<E extends Element>
+public class ElementToPropertyMetaData<E extends EPGMElement>
   implements MapFunction<E, Tuple3<String, String, Set<String>>> {
   /**
    * Reduce object instantiations.
@@ -52,22 +52,20 @@ public class ElementToPropertyMetaData<E extends Element>
   }
 
   @Override
-  public Tuple3<String, String, Set<String>> map(E e) throws Exception {
-    Class<? extends Element> type = e.getClass();
-
-    if (type == Edge.class) {
+  public Tuple3<String, String, Set<String>> map(E element) throws Exception {
+    if (element instanceof EPGMEdge) {
       reuseTuple.f0 = MetaDataSource.EDGE_TYPE;
-    } else if (type == Vertex.class) {
+    } else if (element instanceof EPGMVertex) {
       reuseTuple.f0 = MetaDataSource.VERTEX_TYPE;
-    } else if (type == GraphHead.class) {
+    } else if (element instanceof EPGMGraphHead) {
       reuseTuple.f0 = MetaDataSource.GRAPH_TYPE;
     } else {
-      throw new Exception("Unsupported element class");
+      throw new IllegalArgumentException("Unsupported element class '" + element.getClass() + "'.");
     }
-    reuseTuple.f1 = StringEscaper.escape(e.getLabel(), CSVConstants.ESCAPED_CHARACTERS);
+    reuseTuple.f1 = StringEscaper.escape(element.getLabel(), CSVConstants.ESCAPED_CHARACTERS);
     reuseTuple.f2.clear();
-    if (e.getProperties() != null) {
-      for (Property property : e.getProperties()) {
+    if (element.getProperties() != null) {
+      for (Property property : element.getProperties()) {
         reuseTuple.f2.add(CSVMetaDataParser.getPropertyMetaData(property));
       }
     }

@@ -20,13 +20,13 @@ import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.typeutils.TupleTypeInfo;
 import org.apache.hadoop.conf.Configuration;
+import org.gradoop.common.model.api.entities.EPGMElement;
 import org.gradoop.common.model.impl.metadata.MetaData;
 import org.gradoop.common.model.impl.metadata.PropertyMetaData;
-import org.gradoop.common.model.impl.pojo.Element;
 import org.gradoop.flink.io.api.metadata.functions.ElementToPropertyMetaData;
 import org.gradoop.flink.io.api.metadata.functions.ReducePropertyMetaData;
-import org.gradoop.flink.model.impl.epgm.GraphCollection;
-import org.gradoop.flink.model.impl.epgm.LogicalGraph;
+import org.gradoop.flink.model.api.epgm.BaseGraph;
+import org.gradoop.flink.model.api.epgm.BaseGraphCollection;
 import org.gradoop.flink.util.GradoopFlinkConfig;
 
 import java.io.IOException;
@@ -59,7 +59,7 @@ public interface MetaDataSource<M extends MetaData> {
    * @param graph logical graph
    * @return meta data information
    */
-  default DataSet<Tuple3<String, String, String>> tuplesFromGraph(LogicalGraph graph) {
+  default DataSet<Tuple3<String, String, String>> tuplesFromGraph(BaseGraph<?, ?, ?, ?, ?> graph) {
     return tuplesFromElements(graph.getVertices())
       .union(tuplesFromElements(graph.getEdges()));
   }
@@ -67,13 +67,14 @@ public interface MetaDataSource<M extends MetaData> {
   /**
    * Creates the meta data for the given graph collection.
    *
-   * @param graphs graph collection
+   * @param graphCollection graph collection
    * @return meta data information
    */
-  default DataSet<Tuple3<String, String, String>> tuplesFromCollection(GraphCollection graphs) {
-    return tuplesFromElements(graphs.getVertices())
-      .union(tuplesFromElements(graphs.getEdges()))
-      .union(tuplesFromElements(graphs.getGraphHeads()));
+  default DataSet<Tuple3<String, String, String>> tuplesFromCollection(
+    BaseGraphCollection<?, ?, ?, ?> graphCollection) {
+    return tuplesFromElements(graphCollection.getVertices())
+      .union(tuplesFromElements(graphCollection.getEdges()))
+      .union(tuplesFromElements(graphCollection.getGraphHeads()));
   }
 
   /**
@@ -83,7 +84,7 @@ public interface MetaDataSource<M extends MetaData> {
    * @param <E>      EPGM element type
    * @return meta data information
    */
-  static <E extends Element> DataSet<Tuple3<String, String, String>> tuplesFromElements(
+  static <E extends EPGMElement> DataSet<Tuple3<String, String, String>> tuplesFromElements(
     DataSet<E> elements) {
     return elements
       .map(new ElementToPropertyMetaData<>())

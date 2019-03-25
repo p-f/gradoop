@@ -21,13 +21,19 @@ import org.gradoop.common.model.impl.pojo.temporal.TemporalEdge;
 import org.gradoop.common.model.impl.pojo.temporal.TemporalGraphHead;
 import org.gradoop.common.model.impl.pojo.temporal.TemporalVertex;
 import org.gradoop.flink.io.api.DataSink;
+import org.gradoop.flink.io.api.DataSource;
+import org.gradoop.flink.io.impl.csv.CSVDataSink;
+import org.gradoop.flink.io.impl.csv.CSVDataSource;
 import org.gradoop.flink.io.impl.dot.DOTDataSink;
 import org.gradoop.flink.model.GradoopFlinkTestBase;
 import org.gradoop.flink.model.impl.epgm.LogicalGraph;
 import org.gradoop.flink.util.GradoopFlinkConfig;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
+import java.io.IOException;
 import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
@@ -48,6 +54,12 @@ public class TemporalGraphTest extends GradoopFlinkTestBase {
    * Logical graph to test
    */
   private LogicalGraph testLogicalGraph;
+
+  /**
+   * Temporary test folder to write the test graph.
+   */
+  @Rule
+  public TemporaryFolder testFolder = new TemporaryFolder();
 
   /**
    * Creates a test temporal graph from the social network loader
@@ -79,17 +91,60 @@ public class TemporalGraphTest extends GradoopFlinkTestBase {
 
   /**
    * Test the {@link TemporalGraph#writeTo(DataSink)} method.
+   *
+   * @throws Exception in case of failure
    */
-  @Test(expected = UnsupportedOperationException.class)
-  public void testWriteTo() {
-    testGraph.writeTo(new DOTDataSink("x", true));
+  @Test
+  public void testWriteTo() throws Exception {
+    String tempFolderPath = testFolder.newFolder().getPath();
+
+    testGraph.writeTo(new CSVDataSink(tempFolderPath, getConfig()));
+    getExecutionEnvironment().execute();
+
+    DataSource dataSource = new CSVDataSource(tempFolderPath, getConfig());
+
+    collectAndAssertTrue(dataSource
+      .getTemporalGraph()
+      .toLogicalGraph()
+      .equalsByElementData(testGraph.toLogicalGraph()));
   }
 
   /**
    * Test the {@link TemporalGraph#writeTo(DataSink, boolean)} method.
+   *
+   * @throws Exception in case of failure
+   */
+  @Test
+  public void testWriteToOverwrite() throws Exception {
+    String tempFolderPath = testFolder.newFolder().getPath();
+
+    testGraph.writeTo(new CSVDataSink(tempFolderPath, getConfig()));
+    getExecutionEnvironment().execute();
+
+    testGraph.writeTo(new CSVDataSink(tempFolderPath, getConfig()), true);
+    getExecutionEnvironment().execute();
+
+    DataSource dataSource = new CSVDataSource(tempFolderPath, getConfig());
+
+    collectAndAssertTrue(dataSource
+      .getTemporalGraph()
+      .toLogicalGraph()
+      .equalsByElementData(testGraph.toLogicalGraph()));
+  }
+
+  /**
+   * Test the {@link TemporalGraph#writeTo(DataSink)} method with an unsupported sink.
    */
   @Test(expected = UnsupportedOperationException.class)
-  public void testWriteToOverwrite() {
+  public void testUnsupportedWriteTo() throws IOException {
+    testGraph.writeTo(new DOTDataSink("x", true));
+  }
+
+  /**
+   * Test the {@link TemporalGraph#writeTo(DataSink, boolean)} method with an unsupported sink.
+   */
+  @Test(expected = UnsupportedOperationException.class)
+  public void testUnsupportedWriteToOverwrite() throws IOException {
     testGraph.writeTo(new DOTDataSink("x", true), true);
   }
 

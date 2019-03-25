@@ -33,6 +33,8 @@ import org.gradoop.flink.io.impl.csv.tuples.CSVGraphHead;
 import org.gradoop.flink.io.impl.csv.tuples.CSVVertex;
 import org.gradoop.flink.model.impl.epgm.GraphCollection;
 import org.gradoop.flink.model.impl.epgm.LogicalGraph;
+import org.gradoop.flink.model.impl.tpgm.TemporalGraph;
+import org.gradoop.flink.model.impl.tpgm.TemporalGraphCollection;
 import org.gradoop.flink.util.GradoopFlinkConfig;
 
 import java.io.IOException;
@@ -135,6 +137,18 @@ public class IndexedCSVDataSink extends CSVBase implements DataSink {
 
     edgeFormat.setWriteMode(writeMode);
     csvEdges.output(edgeFormat);
+  }
+
+  @Override
+  public void write(TemporalGraph temporalGraph) throws IOException {
+    throw new UnsupportedOperationException(
+      "Writing an temporal graph to this sink is not supported yet.");
+  }
+
+  @Override
+  public void write(TemporalGraphCollection temporalGraphCollection) throws IOException {
+    throw new UnsupportedOperationException(
+      "Writing an temporal graph collection to this sink is not supported yet.");
   }
 
   /**

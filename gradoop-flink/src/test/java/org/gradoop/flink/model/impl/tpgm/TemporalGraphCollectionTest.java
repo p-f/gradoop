@@ -21,13 +21,19 @@ import org.gradoop.common.model.impl.pojo.temporal.TemporalEdge;
 import org.gradoop.common.model.impl.pojo.temporal.TemporalGraphHead;
 import org.gradoop.common.model.impl.pojo.temporal.TemporalVertex;
 import org.gradoop.flink.io.api.DataSink;
+import org.gradoop.flink.io.api.DataSource;
+import org.gradoop.flink.io.impl.csv.CSVDataSink;
+import org.gradoop.flink.io.impl.csv.CSVDataSource;
 import org.gradoop.flink.io.impl.dot.DOTDataSink;
 import org.gradoop.flink.model.GradoopFlinkTestBase;
 import org.gradoop.flink.model.impl.epgm.GraphCollection;
 import org.gradoop.flink.util.GradoopFlinkConfig;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
+import java.io.IOException;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -47,6 +53,12 @@ public class TemporalGraphCollectionTest extends GradoopFlinkTestBase {
    * Test graph collection
    */
   private GraphCollection testCollection;
+
+  /**
+   * Temporary test folder to write the test graph.
+   */
+  @Rule
+  public TemporaryFolder testFolder = new TemporaryFolder();
 
   /**
    * Creates a test temporal graph collection from the social network loader
@@ -78,17 +90,59 @@ public class TemporalGraphCollectionTest extends GradoopFlinkTestBase {
 
   /**
    * Test the {@link TemporalGraphCollection#writeTo(DataSink)} method.
+   *
+   * @throws Exception in case of failure
+   */
+  @Test
+  public void testWriteTo() throws Exception {
+    String tempFolderPath = testFolder.newFolder().getPath();
+
+    testTemporalCollection.writeTo(new CSVDataSink(tempFolderPath, getConfig()));
+    getExecutionEnvironment().execute();
+
+    DataSource dataSource = new CSVDataSource(tempFolderPath, getConfig());
+
+    collectAndAssertTrue(dataSource
+      .getTemporalGraphCollection()
+      .toGraphCollection()
+      .equalsByGraphElementData(testTemporalCollection.toGraphCollection()));
+  }
+
+  /**
+   * Test the {@link TemporalGraphCollection#writeTo(DataSink, boolean)} method with overwriting.
+   */
+  @Test
+  public void testWriteToOverwrite() throws Exception {
+    String tempFolderPath = testFolder.newFolder().getPath();
+
+    testTemporalCollection.writeTo(new CSVDataSink(tempFolderPath, getConfig()));
+    getExecutionEnvironment().execute();
+
+    testTemporalCollection.writeTo(new CSVDataSink(tempFolderPath, getConfig()), true);
+    getExecutionEnvironment().execute();
+
+    DataSource dataSource = new CSVDataSource(tempFolderPath, getConfig());
+
+    collectAndAssertTrue(dataSource
+      .getTemporalGraphCollection()
+      .toGraphCollection()
+      .equalsByGraphElementData(testTemporalCollection.toGraphCollection()));
+  }
+
+  /**
+   * Test the {@link TemporalGraphCollection#writeTo(DataSink)} method with an unsupported sink.
    */
   @Test(expected = UnsupportedOperationException.class)
-  public void testWriteTo() {
+  public void testUnsupportedWriteTo() throws IOException {
     testTemporalCollection.writeTo(new DOTDataSink("x", true));
   }
 
   /**
-   * Test the {@link TemporalGraphCollection#writeTo(DataSink, boolean)} method.
+   * Test the {@link TemporalGraphCollection#writeTo(DataSink, boolean)} method with overwriting
+   * and an unsupported sink.
    */
   @Test(expected = UnsupportedOperationException.class)
-  public void testWriteToOverwrite() {
+  public void testUnsupportedWriteToOverwrite() throws IOException {
     testTemporalCollection.writeTo(new DOTDataSink("x", true), true);
   }
 

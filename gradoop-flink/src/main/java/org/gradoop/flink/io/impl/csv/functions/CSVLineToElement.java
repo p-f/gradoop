@@ -17,11 +17,11 @@ package org.gradoop.flink.io.impl.csv.functions;
 
 import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.configuration.Configuration;
+import org.gradoop.common.model.api.entities.EPGMElement;
 import org.gradoop.common.model.impl.id.GradoopId;
 import org.gradoop.common.model.impl.id.GradoopIdSet;
 import org.gradoop.common.model.impl.metadata.MetaData;
 import org.gradoop.common.model.impl.metadata.PropertyMetaData;
-import org.gradoop.common.model.impl.pojo.Element;
 import org.gradoop.common.model.impl.properties.Properties;
 import org.gradoop.flink.io.impl.csv.CSVConstants;
 import org.gradoop.flink.io.impl.csv.CSVDataSource;
@@ -31,18 +31,19 @@ import org.gradoop.flink.io.impl.csv.metadata.CSVMetaDataSource;
 import java.util.List;
 
 /**
- * Base class for reading an {@link Element} from CSV. Handles the {@link MetaData} which is
+ * Base class for reading an {@link EPGMElement} from CSV. Handles the {@link MetaData} which is
  * required to parse the property values.
  *
  * @param <E> EPGM element type
  */
-abstract class CSVLineToElement<E extends Element> extends RichMapFunction<String, E> {
+public abstract class CSVLineToElement<E extends EPGMElement> extends RichMapFunction<String, E> {
+
   /**
-   * Stores the properties for the {@link Element} to be parsed.
+   * Stores the properties for the {@link EPGMElement} to be parsed.
    */
   private final Properties properties;
   /**
-   * Meta data that provides parsers for a specific {@link Element}.
+   * Meta data that provides parsers for a specific {@link EPGMElement}.
    */
   private CSVMetaData metaData;
 
@@ -52,7 +53,6 @@ abstract class CSVLineToElement<E extends Element> extends RichMapFunction<Strin
   CSVLineToElement() {
     this.properties = Properties.create();
   }
-
 
   @Override
   public void open(Configuration parameters) throws Exception {
