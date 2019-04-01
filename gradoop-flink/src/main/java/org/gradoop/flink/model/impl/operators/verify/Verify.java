@@ -20,6 +20,7 @@ import org.gradoop.common.model.api.entities.EPGMEdge;
 import org.gradoop.common.model.api.entities.EPGMGraphHead;
 import org.gradoop.common.model.api.entities.EPGMVertex;
 import org.gradoop.flink.model.api.epgm.BaseGraph;
+import org.gradoop.flink.model.api.epgm.BaseGraphCollection;
 import org.gradoop.flink.model.api.operators.UnaryBaseGraphToBaseGraphOperator;
 import org.gradoop.flink.model.impl.functions.epgm.Id;
 import org.gradoop.flink.model.impl.functions.epgm.SourceId;
@@ -30,13 +31,18 @@ import org.gradoop.flink.model.impl.functions.utils.LeftSide;
  * Verifies a graph's edge set, removing dangling edges, i.e. edges with a source- or target-id
  * not matching any vertices of this graph.
  *
- * @param <LG> The graph type.
  * @param <G>  The graph head type.
  * @param <V>  The vertex type.
  * @param <E>  The edge type.
+ * @param <LG> The graph type.
+ * @param <GC> The graph collection type.
  */
-public class Verify<LG extends BaseGraph<G, V, E, LG>, G extends EPGMGraphHead,
-  V extends EPGMVertex, E extends EPGMEdge> implements UnaryBaseGraphToBaseGraphOperator<LG> {
+public class Verify<
+  G extends EPGMGraphHead,
+  V extends EPGMVertex,
+  E extends EPGMEdge,
+  LG extends BaseGraph<G, V, E, LG, GC>,
+  GC extends BaseGraphCollection<G, V, E, GC>> implements UnaryBaseGraphToBaseGraphOperator<LG> {
 
   @Override
   public LG execute(LG graph) {
