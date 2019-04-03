@@ -310,7 +310,7 @@ public class LogicalGraph
 
   @Override
   public LogicalGraph aggregate(AggregateFunction... aggregateFunctions) {
-    return callForGraph(new Aggregation(aggregateFunctions));
+    return callForGraph(new Aggregation<>(aggregateFunctions));
   }
 
   @Override
