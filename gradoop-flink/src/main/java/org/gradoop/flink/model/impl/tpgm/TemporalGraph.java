@@ -25,6 +25,7 @@ import org.gradoop.flink.io.api.DataSink;
 import org.gradoop.flink.model.api.epgm.BaseGraph;
 import org.gradoop.flink.model.api.epgm.BaseGraphCollectionFactory;
 import org.gradoop.flink.model.api.epgm.BaseGraphFactory;
+import org.gradoop.flink.model.api.functions.AggregateFunction;
 import org.gradoop.flink.model.api.functions.TransformationFunction;
 import org.gradoop.flink.model.api.layouts.LogicalGraphLayout;
 import org.gradoop.flink.model.api.operators.UnaryBaseGraphToBaseCollectionOperator;
@@ -38,6 +39,7 @@ import org.gradoop.flink.model.impl.functions.bool.True;
 import org.gradoop.flink.model.impl.functions.epgm.EdgeFromTemporal;
 import org.gradoop.flink.model.impl.functions.epgm.GraphHeadFromTemporal;
 import org.gradoop.flink.model.impl.functions.epgm.VertexFromTemporal;
+import org.gradoop.flink.model.impl.operators.aggregation.Aggregation;
 import org.gradoop.flink.model.impl.operators.matching.common.MatchStrategy;
 import org.gradoop.flink.model.impl.operators.matching.common.statistics.GraphStatistics;
 import org.gradoop.flink.model.impl.operators.matching.single.cypher.CypherPatternMatching;
@@ -164,6 +166,11 @@ public class TemporalGraph implements BaseGraph<TemporalGraphHead, TemporalVerte
   //----------------------------------------------------------------------------
   // Unary Operators
   //----------------------------------------------------------------------------
+
+  @Override
+  public TemporalGraph aggregate(AggregateFunction... aggregateFunctions) {
+    return callForGraph(new Aggregation<>(aggregateFunctions));
+  }
 
   @Override
   public TemporalGraph diff(TemporalPredicate firstSnapShot, TemporalPredicate secondSnapshot,

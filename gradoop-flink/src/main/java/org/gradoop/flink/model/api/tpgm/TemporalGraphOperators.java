@@ -20,10 +20,12 @@ import org.gradoop.common.model.impl.pojo.temporal.TemporalEdge;
 import org.gradoop.common.model.impl.pojo.temporal.TemporalGraphHead;
 import org.gradoop.common.model.impl.pojo.temporal.TemporalVertex;
 import org.gradoop.flink.model.api.epgm.GraphBaseOperators;
+import org.gradoop.flink.model.api.functions.AggregateFunction;
 import org.gradoop.flink.model.api.functions.TransformationFunction;
 import org.gradoop.flink.model.api.operators.UnaryBaseGraphToBaseCollectionOperator;
 import org.gradoop.flink.model.api.operators.UnaryBaseGraphToBaseGraphOperator;
 import org.gradoop.flink.model.api.tpgm.functions.TemporalPredicate;
+import org.gradoop.flink.model.api.tpgm.functions.aggregation.TemporalAggregateFunction;
 import org.gradoop.flink.model.impl.epgm.LogicalGraph;
 import org.gradoop.flink.model.impl.operators.matching.common.MatchStrategy;
 import org.gradoop.flink.model.impl.operators.matching.common.statistics.GraphStatistics;
@@ -41,6 +43,19 @@ public interface TemporalGraphOperators extends GraphBaseOperators {
   //----------------------------------------------------------------------------
   // Unary Operators
   //----------------------------------------------------------------------------
+
+  /**
+   * Applied given aggregate functions to this temporal graph and stores results of each of the
+   * functions as a property on the graph head.<p>
+   * Aggregate functions for non-temporal graphs can be used. Aggregate functions can access
+   * temporal attributes (valid- and transaction-times) by implementing the
+   * {@link TemporalAggregateFunction} interface
+   * instead of {@link AggregateFunction}.
+   *
+   * @param aggregateFunctions The aggregate functions to use.
+   * @return This graph, with aggregation results added to the graph head.
+   */
+  TemporalGraph aggregate(AggregateFunction... aggregateFunctions);
 
   /**
    * Compares two snapshots of this graph. Given two temporal predicates, this operation
