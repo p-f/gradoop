@@ -25,9 +25,17 @@ import org.gradoop.flink.model.api.operators.UnaryBaseGraphToBaseCollectionOpera
 import org.gradoop.flink.model.api.operators.UnaryBaseGraphToBaseGraphOperator;
 import org.gradoop.flink.model.api.tpgm.functions.TemporalPredicate;
 import org.gradoop.flink.model.impl.epgm.LogicalGraph;
+import org.gradoop.flink.model.impl.functions.tpgm.AsOf;
+import org.gradoop.flink.model.impl.functions.tpgm.Between;
+import org.gradoop.flink.model.impl.functions.tpgm.ContainedIn;
+import org.gradoop.flink.model.impl.functions.tpgm.CreatedIn;
+import org.gradoop.flink.model.impl.functions.tpgm.DeletedIn;
+import org.gradoop.flink.model.impl.functions.tpgm.FromTo;
+import org.gradoop.flink.model.impl.functions.tpgm.ValidDuring;
 import org.gradoop.flink.model.impl.operators.matching.common.MatchStrategy;
 import org.gradoop.flink.model.impl.operators.matching.common.statistics.GraphStatistics;
 import org.gradoop.flink.model.impl.operators.subgraph.Subgraph;
+import org.gradoop.flink.model.impl.operators.tpgm.snapshot.Snapshot;
 import org.gradoop.flink.model.impl.tpgm.TemporalGraph;
 import org.gradoop.flink.model.impl.tpgm.TemporalGraphCollection;
 
@@ -41,6 +49,119 @@ public interface TemporalGraphOperators extends GraphBaseOperators {
   //----------------------------------------------------------------------------
   // Unary Operators
   //----------------------------------------------------------------------------
+
+  /**
+   * Extracts a snapshot of this temporal graph using a given temporal predicate.
+   * This will calculate the subgraph induced by the predicate.
+   *
+   * @param predicate the temporal predicate to apply
+   * @return the snapshot as a new temporal graph
+   */
+  default TemporalGraph snapshot(TemporalPredicate predicate) {
+    return callForGraph(new Snapshot(Objects.requireNonNull(predicate)));
+  }
+
+  /**
+   * Extracts a snapshot of this temporal graph using the temporal predicate {@code AS OF timestamp}
+   * where {@code timestamp} is a timestamp in milliseconds.
+   *
+   * @param timestamp the timestamp in milliseconds to query
+   * @return the snapshot as a new temporal graph
+   * @see Snapshot
+   * @see AsOf
+   */
+  default TemporalGraph asOf(long timestamp) {
+    return snapshot(new AsOf(timestamp));
+  }
+
+  /**
+   * Extracts a snapshot of this temporal graph using the temporal predicate
+   * {@code FROM fromTimestamp TO toTimestamp} where both values are timestamps in milliseconds.
+   *
+   * @param fromTimestamp the from timestamp in milliseconds to query
+   * @param toTimestamp the to timestamp in milliseconds to query
+   * @return the snapshot as a new temporal graph
+   * @see Snapshot
+   * @see FromTo
+   */
+  default TemporalGraph fromTo(long fromTimestamp, long toTimestamp) {
+    return snapshot(new FromTo(fromTimestamp, toTimestamp));
+  }
+
+  /**
+   * Extracts a snapshot of this temporal graph using the temporal predicate
+   * {@code BETWEEN fromTimestamp AND toTimestamp} where both values are timestamps in
+   * milliseconds.
+   *
+   * @param fromTimestamp the from timestamp in milliseconds to query
+   * @param toTimestamp the to timestamp in milliseconds to query
+   * @return the snapshot as a new temporal graph
+   * @see Snapshot
+   * @see Between
+   */
+  default TemporalGraph between(long fromTimestamp, long toTimestamp) {
+    return snapshot(new Between(fromTimestamp, toTimestamp));
+  }
+
+  /**
+   * Extracts a snapshot of this temporal graph using the temporal predicate
+   * {@code CONTAINED IN (fromTimestamp, toTimestamp)} where both values are timestamps in
+   * milliseconds.
+   *
+   * @param fromTimestamp the from timestamp in milliseconds to query
+   * @param toTimestamp the to timestamp in milliseconds to query
+   * @return the snapshot as a new temporal graph
+   * @see Snapshot
+   * @see ContainedIn
+   */
+  default TemporalGraph containedIn(long fromTimestamp, long toTimestamp) {
+    return snapshot(new ContainedIn(fromTimestamp, toTimestamp));
+  }
+
+  /**
+   * Extracts a snapshot of this temporal graph using the temporal predicate
+   * {@code VALID DURING (fromTimestamp, toTimestamp)} where both values are timestamps in
+   * milliseconds.
+   *
+   * @param fromTimestamp the from timestamp in milliseconds to query
+   * @param toTimestamp the to timestamp in milliseconds to query
+   * @return the snapshot as a new temporal graph
+   * @see Snapshot
+   * @see ValidDuring
+   */
+  default TemporalGraph validDuring(long fromTimestamp, long toTimestamp) {
+    return snapshot(new ValidDuring(fromTimestamp, toTimestamp));
+  }
+
+  /**
+   * Extracts a snapshot of this temporal graph using the temporal predicate
+   * {@code CREATED IN (fromTimestamp, toTimestamp)} where both values are timestamps in
+   * milliseconds.
+   *
+   * @param fromTimestamp the from timestamp in milliseconds to query
+   * @param toTimestamp the to timestamp in milliseconds to query
+   * @return the snapshot as a new temporal graph
+   * @see Snapshot
+   * @see CreatedIn
+   */
+  default TemporalGraph createdIn(long fromTimestamp, long toTimestamp) {
+    return snapshot(new CreatedIn(fromTimestamp, toTimestamp));
+  }
+
+  /**
+   * Extracts a snapshot of this temporal graph using the temporal predicate
+   * {@code DELETED IN (fromTimestamp, toTimestamp)} where both values are timestamps in
+   * milliseconds.
+   *
+   * @param fromTimestamp the from timestamp in milliseconds to query
+   * @param toTimestamp the to timestamp in milliseconds to query
+   * @return the snapshot as a new temporal graph
+   * @see Snapshot
+   * @see DeletedIn
+   */
+  default TemporalGraph deletedIn(long fromTimestamp, long toTimestamp) {
+    return snapshot(new DeletedIn(fromTimestamp, toTimestamp));
+  }
 
   /**
    * Compares two snapshots of this graph. Given two temporal predicates, this operation
