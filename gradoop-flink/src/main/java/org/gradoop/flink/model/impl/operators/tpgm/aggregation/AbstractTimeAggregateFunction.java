@@ -28,7 +28,7 @@ import java.util.Objects;
  * An abstract super class for aggregation functions that aggregate a time of a temporal element.
  * Times can be a {@link TemporalAttribute.Field} of a {@link TemporalAttribute}.
  */
-public abstract class AbstractTimeStampAggregateFunction extends BaseAggregateFunction
+public abstract class AbstractTimeAggregateFunction extends BaseAggregateFunction
   implements TemporalAggregateFunction {
 
   /**
@@ -48,7 +48,7 @@ public abstract class AbstractTimeStampAggregateFunction extends BaseAggregateFu
    * @param interval             The time-interval to consider.
    * @param field                The field of the time-interval to consider.
    */
-  public AbstractTimeStampAggregateFunction(String aggregatePropertyKey, TemporalAttribute interval,
+  public AbstractTimeAggregateFunction(String aggregatePropertyKey, TemporalAttribute interval,
     TemporalAttribute.Field field) {
     super(aggregatePropertyKey);
     this.interval = Objects.requireNonNull(interval);

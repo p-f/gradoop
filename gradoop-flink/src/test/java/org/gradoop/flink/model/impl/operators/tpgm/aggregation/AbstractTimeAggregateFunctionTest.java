@@ -33,11 +33,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.withSettings;
 
 /**
- * Test for the {@link AbstractTimeStampAggregateFunction}. This test will check if
+ * Test for the {@link AbstractTimeAggregateFunction}. This test will check if
  * the correct temporal attribute is read from an element.
  */
 @RunWith(Parameterized.class)
-public class AbstractTimeStampAggregateFunctionTest extends GradoopFlinkTestBase {
+public class AbstractTimeAggregateFunctionTest extends GradoopFlinkTestBase {
 
   /**
    * The element used as an input to the aggregate function in this test.
@@ -73,14 +73,14 @@ public class AbstractTimeStampAggregateFunctionTest extends GradoopFlinkTestBase
   }
 
   /**
-   * Test if the {@link AbstractTimeStampAggregateFunction#getIncrement(TemporalElement)} returns
+   * Test if the {@link AbstractTimeAggregateFunction#getIncrement(TemporalElement)} returns
    * the correct field.
    */
   @Test
   public void testGetIncrement() {
     // Create a mock of the abstract function. (The first constructor parameter, the property key,
     // is irrelevant for this test.
-    TemporalAggregateFunction mock = mock(AbstractTimeStampAggregateFunction.class, withSettings()
+    TemporalAggregateFunction mock = mock(AbstractTimeAggregateFunction.class, withSettings()
       .useConstructor("", interval, field).defaultAnswer(CALLS_REAL_METHODS));
     PropertyValue increment = mock.getIncrement(testElement);
     assertTrue(increment.isLong());

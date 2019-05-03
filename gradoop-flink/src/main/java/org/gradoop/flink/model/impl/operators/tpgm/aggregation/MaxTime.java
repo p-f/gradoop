@@ -24,7 +24,7 @@ import org.gradoop.flink.model.api.tpgm.functions.TemporalAttribute;
  * elements. This function ignores the default value ({@link Long#MAX_VALUE}) and handles
  * it the same way as {@code null}.
  */
-public abstract class MaxTime extends AbstractTimeStampAggregateFunction {
+public class MaxTime extends AbstractTimeAggregateFunction {
 
   /**
    * The property value that is considered the default value of this aggregate function.
