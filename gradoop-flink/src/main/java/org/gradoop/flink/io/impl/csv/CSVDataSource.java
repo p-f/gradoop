@@ -63,14 +63,17 @@ public class CSVDataSource extends CSVBase implements DataSource {
   }
 
   /**
+   * Will use a single graph head of the collection as final graph head for the graph.
+   * Issue #1217 (https://github.com/dbs-leipzig/gradoop/issues/1217) will optimize further.
+   *
    * {@inheritDoc}
-   * <p>
-   * Graph heads will be disposed at the moment. The following issue attempts to provide
-   * alternatives to keep graph heads: https://github.com/dbs-leipzig/gradoop/issues/974
    */
   @Override
   public LogicalGraph getLogicalGraph() {
-    return getGraphCollection().reduce(new ReduceCombination());
+    GraphCollection collection = getGraphCollection();
+    return getConfig().getLogicalGraphFactory()
+      .fromDataSets(
+        collection.getGraphHeads().first(1), collection.getVertices(), collection.getEdges());
   }
 
   @Override

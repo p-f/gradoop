@@ -64,7 +64,7 @@ public class EdgeFromIds<E extends EPGMEdge> implements
    * @param idTriple triple containing (in that order) edge id, source vertex
    *                 id, target vertex id
    * @return EPGM edge
-   * @throws Exception
+   * @throws Exception on failure
    */
   @Override
   public E map(Tuple3<GradoopId, GradoopId, GradoopId> idTriple) throws

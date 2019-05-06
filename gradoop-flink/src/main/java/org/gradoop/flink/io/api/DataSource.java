@@ -30,8 +30,8 @@ public interface DataSource {
   /**
    * Reads the input as logical graph.
    *
-   * @return logial graph
-   * @throws IOException if the reading of the graph data fails
+   * @return logical graph
+   * @throws IOException on failure
    */
   LogicalGraph getLogicalGraph() throws IOException;
 
@@ -39,7 +39,7 @@ public interface DataSource {
    * Reads the input as graph collection.
    *
    * @return graph collection
-   * @throws IOException if the reading of the graph data fails
+   * @throws IOException on failure
    */
   GraphCollection getGraphCollection() throws IOException;
 
