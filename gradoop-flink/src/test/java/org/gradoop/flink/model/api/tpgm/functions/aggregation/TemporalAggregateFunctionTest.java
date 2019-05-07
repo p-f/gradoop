@@ -21,12 +21,16 @@ import org.gradoop.common.model.impl.pojo.temporal.TemporalElement;
 import org.gradoop.common.model.impl.pojo.temporal.TemporalVertex;
 import org.gradoop.common.model.impl.properties.PropertyValue;
 import org.gradoop.flink.model.GradoopFlinkTestBase;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 /**
  * Test for the {@link TemporalAggregateFunction} interface, checking if temporal elements are
@@ -35,24 +39,19 @@ import static org.mockito.Mockito.spy;
 public class TemporalAggregateFunctionTest extends GradoopFlinkTestBase {
   /**
    * A temporal aggregate function used for this test.
-   * This functions returns the validFrom time.
+   *
    */
-  private TemporalVertexAggregateFunction function = new TemporalVertexAggregateFunction() {
-    @Override
-    public PropertyValue getIncrement(TemporalElement element) {
-      return PropertyValue.create(element.getValidFrom());
-    }
+  private TemporalAggregateFunction function;
 
-    @Override
-    public PropertyValue aggregate(PropertyValue aggregate, PropertyValue increment) {
-      return null;
-    }
-
-    @Override
-    public String getAggregatePropertyKey() {
-      return null;
-    }
-  };
+  /**
+   * Set up this tests aggregate function. That functions returns the validFrom time.
+   */
+  @Before
+  public void setUp() {
+    function = mock(TemporalAggregateFunction.class, CALLS_REAL_METHODS);
+    when(function.getIncrement(any(TemporalElement.class))).thenAnswer(
+      i -> PropertyValue.create(((TemporalElement) i.getArgument(0)).getValidFrom()));
+  }
 
   /**
    * Test if {@link TemporalAggregateFunction} handles temporal elements correctly.
@@ -80,7 +79,7 @@ public class TemporalAggregateFunctionTest extends GradoopFlinkTestBase {
    */
   @Test
   public void testWithNonTemporalAndDefaultValue() {
-    TemporalVertexAggregateFunction withDefault = spy(function);
+    TemporalAggregateFunction withDefault = spy(function);
     // Do not call the real method, return some default value instead.
     doAnswer(i -> PropertyValue.create(0L)).when(withDefault).getNonTemporalDefaultValue(any());
     Vertex vertex = getConfig().getVertexFactory().createVertex();
