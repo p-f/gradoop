@@ -224,7 +224,7 @@ public class LogicalGraph
   public GraphCollection query(String query, String constructionPattern, boolean attachData,
     MatchStrategy vertexStrategy, MatchStrategy edgeStrategy,
     GraphStatistics graphStatistics) {
-    return callForCollection(new CypherPatternMatching(query, constructionPattern, attachData,
+    return callForCollection(new CypherPatternMatching<>(query, constructionPattern, attachData,
       vertexStrategy, edgeStrategy, graphStatistics));
   }
 

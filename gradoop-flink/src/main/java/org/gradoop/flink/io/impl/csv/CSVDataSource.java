@@ -33,7 +33,6 @@ import org.gradoop.flink.model.api.epgm.BaseGraphCollection;
 import org.gradoop.flink.model.api.epgm.BaseGraphCollectionFactory;
 import org.gradoop.flink.model.impl.epgm.GraphCollection;
 import org.gradoop.flink.model.impl.epgm.LogicalGraph;
-import org.gradoop.flink.model.impl.operators.combination.ReduceCombination;
 import org.gradoop.flink.model.impl.tpgm.TemporalGraph;
 import org.gradoop.flink.model.impl.tpgm.TemporalGraphCollection;
 import org.gradoop.flink.util.GradoopFlinkConfig;
@@ -85,9 +84,10 @@ public class CSVDataSource extends CSVBase implements DataSource {
 
   @Override
   public TemporalGraph getTemporalGraph() {
-    TemporalGraphCollection temporalGraphCollection = getTemporalGraphCollection();
+    TemporalGraphCollection collection = getTemporalGraphCollection();
     return getConfig().getTemporalGraphFactory()
-      .fromDataSets(temporalGraphCollection.getVertices(), temporalGraphCollection.getEdges());
+      .fromDataSets(
+        collection.getGraphHeads().first(1), collection.getVertices(), collection.getEdges());
   }
 
   @Override
