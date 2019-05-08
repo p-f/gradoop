@@ -33,7 +33,6 @@ import org.gradoop.flink.model.api.epgm.BaseGraphCollection;
 import org.gradoop.flink.model.api.epgm.BaseGraphCollectionFactory;
 import org.gradoop.flink.model.impl.epgm.GraphCollection;
 import org.gradoop.flink.model.impl.epgm.LogicalGraph;
-import org.gradoop.flink.model.impl.operators.combination.ReduceCombination;
 import org.gradoop.flink.model.impl.tpgm.TemporalGraph;
 import org.gradoop.flink.model.impl.tpgm.TemporalGraphCollection;
 import org.gradoop.flink.util.GradoopFlinkConfig;
@@ -63,14 +62,17 @@ public class CSVDataSource extends CSVBase implements DataSource {
   }
 
   /**
+   * Will use a single graph head of the collection as final graph head for the graph.
+   * Issue #1217 (https://github.com/dbs-leipzig/gradoop/issues/1217) will optimize further.
+   *
    * {@inheritDoc}
-   * <p>
-   * Graph heads will be disposed at the moment. The following issue attempts to provide
-   * alternatives to keep graph heads: https://github.com/dbs-leipzig/gradoop/issues/974
    */
   @Override
   public LogicalGraph getLogicalGraph() {
-    return getGraphCollection().reduce(new ReduceCombination());
+    GraphCollection collection = getGraphCollection();
+    return getConfig().getLogicalGraphFactory()
+      .fromDataSets(
+        collection.getGraphHeads().first(1), collection.getVertices(), collection.getEdges());
   }
 
   @Override
@@ -82,9 +84,10 @@ public class CSVDataSource extends CSVBase implements DataSource {
 
   @Override
   public TemporalGraph getTemporalGraph() {
-    TemporalGraphCollection temporalGraphCollection = getTemporalGraphCollection();
+    TemporalGraphCollection collection = getTemporalGraphCollection();
     return getConfig().getTemporalGraphFactory()
-      .fromDataSets(temporalGraphCollection.getVertices(), temporalGraphCollection.getEdges());
+      .fromDataSets(
+        collection.getGraphHeads().first(1), collection.getVertices(), collection.getEdges());
   }
 
   @Override

@@ -17,6 +17,7 @@ package org.gradoop.flink.model.impl.layouts.gve.temporal;
 
 import com.google.common.collect.Lists;
 import org.apache.flink.api.common.functions.GroupReduceFunction;
+import org.apache.flink.api.common.typeinfo.TypeHint;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.io.LocalCollectionOutputFormat;
 import org.gradoop.common.model.impl.pojo.temporal.TemporalEdge;
@@ -25,6 +26,7 @@ import org.gradoop.common.model.impl.pojo.temporal.TemporalVertex;
 import org.gradoop.flink.model.GradoopFlinkTestBase;
 import org.gradoop.flink.model.api.layouts.GraphCollectionLayout;
 import org.gradoop.flink.model.api.layouts.LogicalGraphLayout;
+import org.gradoop.flink.model.impl.functions.bool.False;
 import org.gradoop.flink.model.impl.layouts.transactional.tuples.GraphTransaction;
 import org.gradoop.flink.model.impl.tpgm.TemporalGraph;
 import org.gradoop.flink.util.FlinkAsciiGraphLoader;
@@ -188,8 +190,11 @@ public class TemporalGraphCollectionLayoutFactoryTest extends GradoopFlinkTestBa
    */
   @Test(expected = UnsupportedOperationException.class)
   public void testFromTransactions() {
-    GraphTransaction transaction = mock(GraphTransaction.class);
-    DataSet<GraphTransaction> transactions = getExecutionEnvironment().fromElements(transaction);
+    DataSet<GraphTransaction> transactions = getExecutionEnvironment()
+      .fromCollection(Lists.newArrayList(
+        new GraphTransaction()),
+        new TypeHint<GraphTransaction>() { }.getTypeInfo())
+      .filter(new False<>());
     factory.fromTransactions(transactions);
   }
 
@@ -199,9 +204,12 @@ public class TemporalGraphCollectionLayoutFactoryTest extends GradoopFlinkTestBa
    */
   @Test(expected = UnsupportedOperationException.class)
   public void testFromTransactionsWithReduceFunctions() {
-    GraphTransaction transaction = mock(GraphTransaction.class);
     GroupReduceFunction reduceFunction = mock(GroupReduceFunction.class);
-    DataSet<GraphTransaction> transactions = getExecutionEnvironment().fromElements(transaction);
+    DataSet<GraphTransaction> transactions = getExecutionEnvironment()
+      .fromCollection(Lists.newArrayList(
+        new GraphTransaction()),
+        new TypeHint<GraphTransaction>() { }.getTypeInfo())
+      .filter(new False<>());
     factory.fromTransactions(transactions, reduceFunction, reduceFunction);
   }
 
