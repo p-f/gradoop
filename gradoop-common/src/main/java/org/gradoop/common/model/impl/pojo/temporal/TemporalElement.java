@@ -30,17 +30,13 @@ import java.util.Objects;
 public abstract class TemporalElement extends Element implements EPGMElement {
 
   /**
-   * The default value for unset valid times (validFrom).
+   * The default value for unset times (validFrom and txFrom).
    */
-  public static final Long DEFAULT_VALID_TIME_FROM = Long.MIN_VALUE;
+  public static final Long DEFAULT_TIME_FROM = Long.MIN_VALUE;
   /**
-   * The default value for unset valid times (validTo).
+   * The default value for unset valid times (validTo and txTo).
    */
-  public static final Long DEFAULT_VALID_TIME_TO = Long.MAX_VALUE;
-  /**
-   * The default value for unset end of transaction time.
-   */
-  public static final Long DEFAULT_TX_TO = Long.MAX_VALUE;
+  public static final Long DEFAULT_TIME_TO = Long.MAX_VALUE;
   /**
    * Transaction time interval containing the beginning and end of the elements transaction time.
    * Its values are unix timestamps in milliseconds.
@@ -73,9 +69,9 @@ public abstract class TemporalElement extends Element implements EPGMElement {
     Long validTo) {
     super(id, label, properties);
     // Set transaction time beginning to the current system time
-    transactionTime = new Tuple2<>(System.currentTimeMillis(), DEFAULT_TX_TO);
+    transactionTime = new Tuple2<>(System.currentTimeMillis(), DEFAULT_TIME_TO);
 
-    validTime = new Tuple2<>(DEFAULT_VALID_TIME_FROM, DEFAULT_VALID_TIME_TO);
+    validTime = new Tuple2<>(DEFAULT_TIME_FROM, DEFAULT_TIME_TO);
     if (validFrom != null) {
       this.setValidFrom(validFrom);
     }

@@ -230,8 +230,8 @@ public abstract class GradoopFlinkTestBase {
 
 
   public static Tuple2<Long, Long> extractTime(EPGMElement element) {
-    Tuple2<Long, Long> validTime = new Tuple2<>(TemporalElement.DEFAULT_VALID_TIME_FROM,
-      TemporalElement.DEFAULT_VALID_TIME_TO);
+    Tuple2<Long, Long> validTime = new Tuple2<>(TemporalElement.DEFAULT_TIME_FROM,
+      TemporalElement.DEFAULT_TIME_TO);
 
     if (element.hasProperty("__valFrom")) {
       validTime.f0 = element.getPropertyValue("__valFrom").getLong();
@@ -286,8 +286,8 @@ public abstract class GradoopFlinkTestBase {
    * @param element the temporal graph element to check
    */
   protected void checkDefaultTemporalElement(TemporalElement element) {
-    assertEquals(TemporalElement.DEFAULT_VALID_TIME_FROM, element.getValidFrom());
-    assertEquals(TemporalElement.DEFAULT_VALID_TIME_TO, element.getValidTo());
+    assertEquals(TemporalElement.DEFAULT_TIME_FROM, element.getValidFrom());
+    assertEquals(TemporalElement.DEFAULT_TIME_TO, element.getValidTo());
     checkDefaultTxTimes(element);
   }
 
@@ -298,6 +298,6 @@ public abstract class GradoopFlinkTestBase {
    */
   protected void checkDefaultTxTimes(TemporalElement element) {
     assertTrue(element.getTxFrom() < System.currentTimeMillis());
-    assertEquals(TemporalElement.DEFAULT_TX_TO, element.getTxTo());
+    assertEquals(TemporalElement.DEFAULT_TIME_TO, element.getTxTo());
   }
 }

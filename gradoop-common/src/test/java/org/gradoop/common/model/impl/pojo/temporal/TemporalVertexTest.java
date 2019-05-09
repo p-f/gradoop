@@ -65,8 +65,8 @@ public class TemporalVertexTest {
     assertNotNull(temporalVertex.getId());
     assertEquals(GradoopConstants.DEFAULT_VERTEX_LABEL, temporalVertex.getLabel());
     assertNull(temporalVertex.getGraphIds());
-    assertEquals(TemporalElement.DEFAULT_VALID_TIME_FROM, temporalVertex.getValidFrom());
-    assertEquals(TemporalElement.DEFAULT_VALID_TIME_TO, temporalVertex.getValidTo());
+    assertEquals(TemporalElement.DEFAULT_TIME_FROM, temporalVertex.getValidFrom());
+    assertEquals(TemporalElement.DEFAULT_TIME_TO, temporalVertex.getValidTo());
   }
 
   /**
@@ -90,7 +90,7 @@ public class TemporalVertexTest {
     assertEquals(nonTemporalVertex.getProperties(), temporalVertex.getProperties());
     assertEquals(nonTemporalVertex.getPropertyCount(), temporalVertex.getPropertyCount());
     assertEquals(nonTemporalVertex.getGraphIds(), temporalVertex.getGraphIds());
-    assertEquals(TemporalElement.DEFAULT_VALID_TIME_FROM, temporalVertex.getValidFrom());
-    assertEquals(TemporalElement.DEFAULT_VALID_TIME_TO, temporalVertex.getValidTo());
+    assertEquals(TemporalElement.DEFAULT_TIME_FROM, temporalVertex.getValidFrom());
+    assertEquals(TemporalElement.DEFAULT_TIME_TO, temporalVertex.getValidTo());
   }
 }

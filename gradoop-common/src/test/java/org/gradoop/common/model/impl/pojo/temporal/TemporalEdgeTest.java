@@ -99,8 +99,8 @@ public class TemporalEdgeTest {
     TemporalEdge temporalEdge = factory.initEdge(edgeId, label, sourceId, targetId, null, null,
       null, null);
 
-    assertEquals(TemporalElement.DEFAULT_VALID_TIME_FROM, temporalEdge.getValidFrom());
-    assertEquals(TemporalElement.DEFAULT_VALID_TIME_TO, temporalEdge.getValidTo());
+    assertEquals(TemporalElement.DEFAULT_TIME_FROM, temporalEdge.getValidFrom());
+    assertEquals(TemporalElement.DEFAULT_TIME_TO, temporalEdge.getValidTo());
   }
 
   /**
@@ -115,8 +115,8 @@ public class TemporalEdgeTest {
     assertEquals(sourceId, temporalEdge.getSourceId());
     assertEquals(targetId, temporalEdge.getTargetId());
     assertEquals(GradoopConstants.DEFAULT_EDGE_LABEL, temporalEdge.getLabel());
-    assertEquals(TemporalElement.DEFAULT_VALID_TIME_FROM, temporalEdge.getValidFrom());
-    assertEquals(TemporalElement.DEFAULT_VALID_TIME_TO, temporalEdge.getValidTo());
+    assertEquals(TemporalElement.DEFAULT_TIME_FROM, temporalEdge.getValidFrom());
+    assertEquals(TemporalElement.DEFAULT_TIME_TO, temporalEdge.getValidTo());
   }
 
   /**
@@ -145,7 +145,7 @@ public class TemporalEdgeTest {
     assertEquals(nonTemporalEdge.getProperties(), temporalEdge.getProperties());
     assertEquals(nonTemporalEdge.getPropertyCount(), temporalEdge.getPropertyCount());
     assertEquals(nonTemporalEdge.getGraphIds(), temporalEdge.getGraphIds());
-    assertEquals(TemporalElement.DEFAULT_VALID_TIME_FROM, temporalEdge.getValidFrom());
-    assertEquals(TemporalElement.DEFAULT_VALID_TIME_TO, temporalEdge.getValidTo());
+    assertEquals(TemporalElement.DEFAULT_TIME_FROM, temporalEdge.getValidFrom());
+    assertEquals(TemporalElement.DEFAULT_TIME_TO, temporalEdge.getValidTo());
   }
 }

@@ -15,6 +15,7 @@
  */
 package org.gradoop.flink.model.impl.operators.tpgm.aggregation;
 
+import org.gradoop.common.model.impl.pojo.temporal.TemporalElement;
 import org.gradoop.common.model.impl.properties.PropertyValue;
 import org.gradoop.common.model.impl.properties.PropertyValueUtils;
 import org.gradoop.flink.model.api.tpgm.functions.TemporalAttribute;
@@ -30,7 +31,8 @@ public class MinTime extends AbstractTimeAggregateFunction {
    * The property value that is considered the default value of this aggregate function.
    * This value is ignored during aggregation.
    */
-  private static final PropertyValue DEFAULT = PropertyValue.create(Long.MIN_VALUE);
+  private static final PropertyValue DEFAULT =
+    PropertyValue.create(TemporalElement.DEFAULT_TIME_FROM);
 
   /**
    * Sets attributes used to initialize this aggregate function.

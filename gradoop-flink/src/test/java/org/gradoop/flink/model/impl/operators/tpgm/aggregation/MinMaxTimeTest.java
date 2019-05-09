@@ -95,6 +95,18 @@ public class MinMaxTimeTest extends GradoopFlinkTestBase {
   public Long expectedMinVertex;
 
   /**
+   * The expected value for the {@link MaxTime} function.
+   */
+  @Parameterized.Parameter(6)
+  public Long expectedMax;
+
+  /**
+   * The expected value for the {@link MinTime} function.
+   */
+  @Parameterized.Parameter(7)
+  public Long expectedMin;
+
+  /**
    * Test all {@link MinTime} and {@link MaxTime} related aggregate functions.
    *
    * @throws Exception when the execution in Flink fails.
@@ -105,16 +117,22 @@ public class MinMaxTimeTest extends GradoopFlinkTestBase {
     final String keyMinEdge = "minEdgeTime";
     final String keyMaxVertex = "maxVertexTime";
     final String keyMinVertex = "minVertexTime";
+    final String keyMax = "maxTime";
+    final String keyMin = "minTime";
     TemporalGraph result = getTestGraphWithValues().aggregate(
       new MaxEdgeTime(keyMaxEdge, temporalAttribute, field),
       new MinEdgeTime(keyMinEdge, temporalAttribute, field),
       new MaxVertexTime(keyMaxVertex, temporalAttribute, field),
-      new MinVertexTime(keyMinVertex, temporalAttribute, field));
+      new MinVertexTime(keyMinVertex, temporalAttribute, field),
+      new MinTime(keyMin, temporalAttribute, field),
+      new MaxTime(keyMax, temporalAttribute, field));
     TemporalGraphHead head = result.getGraphHead().collect().get(0);
     assertEquals(PropertyValue.create(expectedMaxEdge), head.getPropertyValue(keyMaxEdge));
     assertEquals(PropertyValue.create(expectedMinEdge), head.getPropertyValue(keyMinEdge));
     assertEquals(PropertyValue.create(expectedMaxVertex), head.getPropertyValue(keyMaxVertex));
     assertEquals(PropertyValue.create(expectedMinVertex), head.getPropertyValue(keyMinVertex));
+    assertEquals(PropertyValue.create(expectedMax), head.getPropertyValue(keyMax));
+    assertEquals(PropertyValue.create(expectedMin), head.getPropertyValue(keyMin));
   }
 
   /**
@@ -131,11 +149,15 @@ public class MinMaxTimeTest extends GradoopFlinkTestBase {
     final String keyMinEdge = "minEdgeTime";
     final String keyMaxVertex = "maxVertexTime";
     final String keyMinVertex = "minVertexTime";
+    final String keyMax = "maxTime";
+    final String keyMin = "minTime";
     TemporalGraph result = getTestGraphWithAllDefaults().aggregate(
       new MaxEdgeTime(keyMaxEdge, temporalAttribute, field),
       new MinEdgeTime(keyMinEdge, temporalAttribute, field),
       new MaxVertexTime(keyMaxVertex, temporalAttribute, field),
-      new MinVertexTime(keyMinVertex, temporalAttribute, field));
+      new MinVertexTime(keyMinVertex, temporalAttribute, field),
+      new MinTime(keyMin, temporalAttribute, field),
+      new MaxTime(keyMax, temporalAttribute, field));
     TemporalGraphHead head = result.getGraphHead().collect().get(0);
     // The expected values for max and min aggregations. Those should be null, when the minimum
     // of all FROM or the maximum of all TO fields is calculated.
@@ -147,6 +169,8 @@ public class MinMaxTimeTest extends GradoopFlinkTestBase {
     assertEquals(min, head.getPropertyValue(keyMinEdge));
     assertEquals(max, head.getPropertyValue(keyMaxVertex));
     assertEquals(min, head.getPropertyValue(keyMinVertex));
+    assertEquals(max, head.getPropertyValue(keyMax));
+    assertEquals(min, head.getPropertyValue(keyMin));
   }
 
   /**
@@ -158,6 +182,8 @@ public class MinMaxTimeTest extends GradoopFlinkTestBase {
    * <li>The expected result of {@link MinEdgeTime}.</li>
    * <li>The expected result of {@link MaxVertexTime}.</li>
    * <li>The expected result of {@link MinVertexTime}.</li>
+   * <li>The expected result of {@link MaxTime}.</li>
+   * <li>The expected result of {@link MinTime}.</li>
    * </ol>
    *
    * @return The parameters for this test.
@@ -165,10 +191,10 @@ public class MinMaxTimeTest extends GradoopFlinkTestBase {
   @Parameterized.Parameters(name = "{0}.{1}")
   public static Iterable<Object[]> parameters() {
     return Arrays.asList(new Object[][] {
-      {TRANSACTION_TIME, FROM, 4L, -2L, 3L, 0L},
-      {TRANSACTION_TIME, TO, 5L, -2L, 3L, 1L},
-      {VALID_TIME, FROM, 7L, -1L, 4L, 1L},
-      {VALID_TIME, TO, 6L, -1L, 4L, 1L}
+      {TRANSACTION_TIME, FROM, 4L, -2L, 3L, 0L, 4L, -2L},
+      {TRANSACTION_TIME, TO, 5L, -2L, 3L, 1L, 5L, -2L},
+      {VALID_TIME, FROM, 7L, -1L, 4L, 1L, 7L, -1L},
+      {VALID_TIME, TO, 6L, -1L, 4L, 1L, 6L, -1L}
     });
   }
 
